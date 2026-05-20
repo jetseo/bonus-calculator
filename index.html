@@ -153,10 +153,12 @@
   /* ── Division section ── */
   .div-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 12px;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
     margin-top: 4px;
   }
+  :root { --lsi-color: #a78bfa; }
+  .div-col-title.lsi { color: var(--lsi-color); }
   .div-col { }
   .div-col-title {
     font-size: 13px;
@@ -200,9 +202,18 @@
   /* ── Results ── */
   .result-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
     margin-top: 4px;
+  }
+  .result-card.lsi::after { background: var(--lsi-color); }
+  .result-name.lsi { color: var(--lsi-color); }
+  .result-card.deficit-active .result-name.lsi::after,
+  .result-card.deficit-active .result-name.foundry::after {
+    content: ' 〔적자〕';
+    font-size: 9px;
+    color: var(--red);
+    font-weight: 400;
   }
   .result-card {
     background: var(--card2);
@@ -513,6 +524,7 @@
   /* 2026년 탭: 르팡 관련 불필요 요소 숨김 */
   .year-2026-active .deficit-row { display: none !important; }
   .year-2026-active .fou-weight-group { display: none !important; }
+  .year-2026-active .lsi-weight-group { display: none !important; }
   /* responsive tweaks */
   @media (max-width: 400px) {
     .div-col-title { font-size: 12px; }
@@ -548,7 +560,7 @@
       <div class="div-col-title memory">메모리</div>
       <div class="input-group">
         <label>인원 (명)</label>
-        <input type="number" id="mem-headcount" value="27400" oninput="updateAll()">
+        <input type="number" id="mem-headcount" value="28000" oninput="updateAll()">
       </div>
       <div class="input-group">
         <label>사업부 비율</label>
@@ -560,32 +572,48 @@
       <div class="div-col-title common">공통</div>
       <div class="input-group">
         <label>인원 (명)</label>
-        <input type="number" id="com-headcount" value="29000" oninput="updateAll()">
+        <input type="number" id="com-headcount" value="31000" oninput="updateAll()">
       </div>
       <div class="input-group">
         <label>사업부 비율</label>
         <input type="number" id="com-weight" value="0.7" step="0.1" min="0" max="3" oninput="updateAll()">
       </div>
     </div>
-    <!-- Foundry -->
+    <!-- S.LSI -->
     <div class="div-col">
-      <div class="div-col-title foundry">르팡</div>
+      <div class="div-col-title lsi">S.LSI</div>
       <div class="input-group">
         <label>인원 (명)</label>
-        <input type="number" id="fou-headcount" value="20900" oninput="updateAll()">
+        <input type="number" id="lsi-headcount" value="9000" oninput="updateAll()">
+      </div>
+      <div class="input-group lsi-weight-group">
+        <label>사업부 비율</label>
+        <input type="number" id="lsi-weight" value="0.7" step="0.1" min="0" max="3" oninput="updateAll()">
+      </div>
+      <div class="deficit-row">
+        <div class="deficit-label">S.LSI 손익<span>공통×60% 적용(2027~)</span></div>
+        <div class="toggle-wrap">
+          <span class="toggle-text deficit-on" id="lsi-deficit-text">적자</span>
+          <button class="toggle-btn on" id="lsi-deficit-btn" onclick="toggleDeficit('lsi')"></button>
+        </div>
+      </div>
+    </div>
+    <!-- Foundry -->
+    <div class="div-col">
+      <div class="div-col-title foundry">파운드리</div>
+      <div class="input-group">
+        <label>인원 (명)</label>
+        <input type="number" id="fou-headcount" value="10000" oninput="updateAll()">
       </div>
       <div class="input-group fou-weight-group">
         <label>사업부 비율</label>
-        <input type="number" id="fou-weight" value="0.0" step="0.1" min="0" max="3" oninput="updateAll()">
+        <input type="number" id="fou-weight" value="0.7" step="0.1" min="0" max="3" oninput="updateAll()">
       </div>
       <div class="deficit-row">
-        <div class="deficit-label">
-          적자 사업부
-          <span>공통×60% 적용</span>
-        </div>
+        <div class="deficit-label">파운드리 손익<span>공통×60% 적용(2027~)</span></div>
         <div class="toggle-wrap">
-          <span class="toggle-text deficit-on" id="deficit-text">적자</span>
-          <button class="toggle-btn on" id="deficit-btn" onclick="toggleDeficit()"></button>
+          <span class="toggle-text deficit-on" id="fou-deficit-text">적자</span>
+          <button class="toggle-btn on" id="fou-deficit-btn" onclick="toggleDeficit('fou')"></button>
         </div>
       </div>
     </div>
@@ -657,7 +685,7 @@
       <div class="result-line"><span class="line-label">사업부</span><b id="mem-bu-part">-</b></div>
       <div class="result-total" id="mem-total">-</div>
       <div class="result-sub" id="mem-sub">-</div>
-      <div class="result-bar"><div class="result-bar-fill" id="mem-bar" style="width:100%"></div></div>
+      <div class="result-bar"><div class="result-bar-fill memory" id="mem-bar" style="width:100%"></div></div>
     </div>
     <div class="result-card common">
       <div class="result-name common">공통</div>
@@ -665,16 +693,25 @@
       <div class="result-line"><span class="line-label">사업부</span><b id="com-bu-part">-</b></div>
       <div class="result-total" id="com-total">-</div>
       <div class="result-sub" id="com-sub">-</div>
-      <div class="result-bar"><div class="result-bar-fill" id="com-bar" style="width:75%"></div></div>
+      <div class="result-bar"><div class="result-bar-fill common" id="com-bar" style="width:75%"></div></div>
+    </div>
+    <div class="result-card lsi deficit-active" id="lsi-card">
+      <div class="result-name lsi">S.LSI</div>
+      <div class="result-line"><span class="line-label">부문</span><b id="lsi-div-part">-</b></div>
+      <div class="result-line"><span class="line-label">사업부</span><b id="lsi-bu-part">-</b></div>
+      <div class="result-total" id="lsi-total">-</div>
+      <div class="result-sub" id="lsi-sub">-</div>
+      <div class="deficit-note show" id="lsi-deficit-note">공통 지급률 × 60%</div>
+      <div class="result-bar"><div class="result-bar-fill" style="background:var(--lsi-color);width:30%" id="lsi-bar"></div></div>
     </div>
     <div class="result-card foundry deficit-active" id="fou-card">
-      <div class="result-name foundry" id="fou-name">르팡</div>
+      <div class="result-name foundry">파운드리</div>
       <div class="result-line"><span class="line-label">부문</span><b id="fou-div-part">-</b></div>
       <div class="result-line"><span class="line-label">사업부</span><b id="fou-bu-part">-</b></div>
       <div class="result-total" id="fou-total">-</div>
       <div class="result-sub" id="fou-sub">-</div>
       <div class="deficit-note show" id="fou-deficit-note">공통 지급률 × 60%</div>
-      <div class="result-bar"><div class="result-bar-fill" id="fou-bar" style="width:30%"></div></div>
+      <div class="result-bar"><div class="result-bar-fill foundry" id="fou-bar" style="width:30%"></div></div>
     </div>
   </div>
   </div><!-- /card-body -->
@@ -716,55 +753,68 @@
 
 <script>
 function fmt만(val) {
-  // val in 만원 → always show 만원 with comma
   return Math.round(val).toLocaleString() + '만원';
 }
-
+function fmtEok(val) {
+  return '≈ ' + (val / 10000).toFixed(1) + '억';
+}
 function fitText(el, startSize) {
-  // shrink font until text fits without wrapping
   let size = startSize || 16;
   el.style.fontSize = size + 'px';
-  // requestAnimationFrame 없이 즉시 측정 가능하도록 display:inline-block 보장
   while (el.scrollWidth > el.offsetWidth && size > 7) {
     size -= 0.5;
     el.style.fontSize = size + 'px';
   }
 }
-function fmtEok(val) {
-  // val in 만원 → 1억 = 10,000만
-  return '≈ ' + (val / 10000).toFixed(1) + '억';
-}
-
 function updateSliderFill(el) {
   const min = parseFloat(el.min), max = parseFloat(el.max), val = parseFloat(el.value);
-  const pct = ((val - min) / (max - min)) * 100;
-  el.style.setProperty('--pct', pct + '%');
+  el.style.setProperty('--pct', ((val-min)/(max-min)*100) + '%');
 }
 
-// 연도 상태: 2026(적자조항 미적용) / 2027(공통×60%)
 let currentYear = 2026;
+
+function selectYear(year) {
+  currentYear = year;
+  document.getElementById('year-2026').classList.toggle('active', year===2026);
+  document.getElementById('year-2027').classList.toggle('active', year===2027);
+  document.body.classList.toggle('year-2026-active', year===2026);
+  updateAll();
+}
 
 function toggleCard(id) {
   const body    = document.getElementById(id);
-  const chevron = document.getElementById('chevron-' + id);
+  const chevron = document.getElementById('chevron-'+id);
   const isOpen  = body.classList.contains('open');
   body.classList.toggle('open', !isOpen);
   chevron.classList.toggle('open', !isOpen);
 }
 
-function selectYear(year) {
-  currentYear = year;
-  document.getElementById('year-2026').classList.toggle('active', year === 2026);
-  document.getElementById('year-2027').classList.toggle('active', year === 2027);
+// type: 'lsi' | 'fou'
+function toggleDeficit(type) {
+  const btn   = document.getElementById(type+'-deficit-btn');
+  const txt   = document.getElementById(type+'-deficit-text');
+  const card  = document.getElementById(type+'-card');
+  const note  = document.getElementById(type+'-deficit-note');
+  const wEl   = document.getElementById(type+'-weight');
 
-  // 2026년: 적자/흑자 토글 + 사업부 비율 숨김
-  document.body.classList.toggle('year-2026-active', year === 2026);
+  btn.classList.toggle('on');
+  const isDeficit = btn.classList.contains('on');
 
-  const noteEl = document.getElementById('year-note');
-  if (year === 2026) {
-    noteEl.innerHTML = '<span>2026년</span>: 적자조항 미적용 · 공통/르팡 동일 배분';
+  txt.textContent = isDeficit ? '적자' : '흑자';
+  txt.className   = 'toggle-text ' + (isDeficit ? 'deficit-on' : 'deficit-off');
+  card.classList.toggle('deficit-active', isDeficit);
+  note.classList.toggle('show', isDeficit);
+  if (isDeficit) requestAnimationFrame(() => fitText(note, 10));
+
+  if (isDeficit) {
+    wEl.dataset.saved = wEl.value;
+    wEl.value = '0.0';
+    wEl.disabled = true;
+    wEl.style.opacity = '0.35';
   } else {
-    noteEl.innerHTML = '<span>2027년~</span>: 흑자 정상배분 / 적자 시 공통×60% 보장';
+    wEl.value = (wEl.dataset.saved && wEl.dataset.saved !== '0.0') ? wEl.dataset.saved : '0.7';
+    wEl.disabled = false;
+    wEl.style.opacity = '1';
   }
   updateAll();
 }
@@ -784,71 +834,86 @@ function updateAll() {
   document.getElementById('rate-display').textContent  = rate.toFixed(1) + '%';
   document.getElementById('ratio-display').textContent = divRatio + ' : ' + buRatio;
 
-  const total조 = oi * rate / 100;
-  const total억 = total조 * 10000;
-  const total만 = total억 * 10000;
-
+  const total만 = oi * rate/100 * 10000 * 10000;
+  const total억 = total만 / 10000;
+  const total조 = total억 / 10000;
   document.getElementById('total-display').innerHTML =
     total조.toFixed(1) + '조 <span class="total-sub">(' + Math.round(total억).toLocaleString() + '억원)</span>';
 
   const divPool만 = total만 * divRatio / 10;
   const buPool만  = total만 * buRatio  / 10;
 
+  // 인원
   const memHC = parseInt(document.getElementById('mem-headcount').value) || 1;
   const comHC = parseInt(document.getElementById('com-headcount').value) || 1;
+  const lsiHC = parseInt(document.getElementById('lsi-headcount').value) || 1;
   const fouHC = parseInt(document.getElementById('fou-headcount').value) || 1;
-  const memW  = parseFloat(document.getElementById('mem-weight').value)  || 0;
-  const comW  = parseFloat(document.getElementById('com-weight').value)  || 0;
+  const totalHC = memHC + comHC + lsiHC + fouHC;
+
+  // 가중치
+  const memW = parseFloat(document.getElementById('mem-weight').value) || 0;
+  const comW = parseFloat(document.getElementById('com-weight').value) || 0;
+  const lsiWRaw = parseFloat(document.getElementById('lsi-weight').value) || 0;
   const fouWRaw = parseFloat(document.getElementById('fou-weight').value) || 0;
 
-  // 2026: LSI/파운드리 현재 적자 → 사업부 60%는 메모리+공통만 배분
-  // 2027+: 흑자면 정상배분, 적자면 공통×60%
-  // isDeficit: 르팡(시스템LSI 포함) 적자 여부
-  const isDeficit = document.getElementById('deficit-btn').classList.contains('on');
+  // 적자 여부 (각각 독립)
+  const lsiDeficit = document.getElementById('lsi-deficit-btn').classList.contains('on');
+  const fouDeficit = document.getElementById('fou-deficit-btn').classList.contains('on');
 
-  // 연도 안내문구
-  const yrNote = document.getElementById('year-note');
-  if (currentYear === 2026) {
-    yrNote.innerHTML = '<span>2026년</span>: LSI·파운드리 적자 → 사업부분은 메모리·공통만 배분';
-  } else if (!isDeficit) {
-    yrNote.innerHTML = '<span>2027년~</span>: 흑자 · 사업부 재원 정상 배분';
-  } else {
-    yrNote.innerHTML = '<span>2027년~</span>: 적자 · 공통 지급률 × 60% 보장';
-  }
+  // 2026년: 적자조항 미적용, 그러나 현재 실제 적자이므로 사업부 pool 제외
+  // 2027~: 토글에 따라 결정
+  const lsiIsOut = (currentYear === 2026) ? lsiDeficit : lsiDeficit;
+  const fouIsOut = (currentYear === 2026) ? fouDeficit : fouDeficit;
+  const lsiW = lsiIsOut ? 0 : lsiWRaw;
+  const fouW = fouIsOut ? 0 : fouWRaw;
 
-  // 부문 40%: DS부문 전 직원 균등
-  const totalHC     = memHC + comHC + fouHC;
+  // 부문 40%: 전 직원 균등
   const perHeadDiv만 = divPool만 / totalHC;
 
-  // 사업부 60% 계산
-  // 2026년 또는 2027+ 적자: 르팡은 pool 제외(fouW=0)
-  // 2027+ 흑자: fouWRaw 사용
-  const fouW = (currentYear === 2026 || isDeficit) ? 0 : fouWRaw;
-
-  const totalWHC = memHC*memW + comHC*comW + fouHC*fouW;
+  // 사업부 60%: 적자 사업부 pool 제외
+  const totalWHC = memHC*memW + comHC*comW + lsiHC*lsiW + fouHC*fouW;
   const base만    = totalWHC > 0 ? buPool만 / totalWHC : 0;
 
   const memBU만 = base만 * memW;
   const comBU만 = base만 * comW;
-  const fouBU만 = base만 * fouW;  // 2026/적자면 0
+  const lsiBU만 = base만 * lsiW;
+  const fouBU만 = base만 * fouW;
 
   const memTotal만 = perHeadDiv만 + memBU만;
   const comTotal만 = perHeadDiv만 + comBU만;
 
-  // 르팡 최종 계산
+  // S.LSI 최종
+  let lsiTotal만, lsiBU표시만;
+  if (!lsiIsOut) {
+    lsiTotal만  = perHeadDiv만 + lsiBU만;
+    lsiBU표시만 = lsiBU만;
+  } else if (currentYear === 2026) {
+    lsiTotal만  = perHeadDiv만;
+    lsiBU표시만 = 0;
+  } else {
+    lsiTotal만  = comTotal만 * 0.6;
+    lsiBU표시만 = lsiTotal만 - perHeadDiv만;
+  }
+
+  // 파운드리 최종
   let fouTotal만, fouBU표시만;
-  if (currentYear === 2026 || (currentYear !== 2026 && isDeficit === false && fouW === 0)) {
-    // 2026년: 부문분만
-    fouTotal만  = perHeadDiv만;
-    fouBU표시만 = 0;
-  } else if (!isDeficit) {
-    // 2027년~ 흑자: 정상 배분
+  if (!fouIsOut) {
     fouTotal만  = perHeadDiv만 + fouBU만;
     fouBU표시만 = fouBU만;
+  } else if (currentYear === 2026) {
+    fouTotal만  = perHeadDiv만;
+    fouBU표시만 = 0;
   } else {
-    // 2027년~ 적자: 공통 지급률 × 60%
     fouTotal만  = comTotal만 * 0.6;
     fouBU표시만 = fouTotal만 - perHeadDiv만;
+  }
+
+  // 연도 안내
+  const yrNote = document.getElementById('year-note');
+  if (currentYear === 2026) {
+    yrNote.innerHTML = '<span>2026년</span>: 적자 사업부는 사업부 재원 미지급 (적자조항은 2027년~)';
+  } else {
+    yrNote.innerHTML = '<span>2027년~</span>: 적자 시 공통 지급률 × 60% 보장';
   }
 
   function setResult(prefix, div만, bu만, tot만) {
@@ -864,46 +929,16 @@ function updateAll() {
     document.getElementById(prefix+'-sub').textContent = fmtEok(tot만);
   }
 
-  setResult('mem', perHeadDiv만, memBU만, memTotal만);
-  setResult('com', perHeadDiv만, comBU만, comTotal만);
+  setResult('mem', perHeadDiv만, memBU만,    memTotal만);
+  setResult('com', perHeadDiv만, comBU만,    comTotal만);
+  setResult('lsi', perHeadDiv만, lsiBU표시만, lsiTotal만);
   setResult('fou', perHeadDiv만, fouBU표시만, fouTotal만);
 
-  const maxTotal = Math.max(memTotal만, comTotal만, fouTotal만, 1);
-  document.getElementById('mem-bar').style.width = (memTotal만/maxTotal*100).toFixed(1) + '%';
-  document.getElementById('com-bar').style.width = (comTotal만/maxTotal*100).toFixed(1) + '%';
-  document.getElementById('fou-bar').style.width = (fouTotal만/maxTotal*100).toFixed(1) + '%';
-}
-
-function toggleDeficit() {
-  const btn  = document.getElementById('deficit-btn');
-  const txt  = document.getElementById('deficit-text');
-  const card = document.getElementById('fou-card');
-  const note = document.getElementById('fou-deficit-note');
-  const wEl  = document.getElementById('fou-weight');
-
-  btn.classList.toggle('on');
-  const isDeficit = btn.classList.contains('on');
-
-  txt.textContent = isDeficit ? '적자' : '흑자';
-  txt.className   = 'toggle-text ' + (isDeficit ? 'deficit-on' : 'deficit-off');
-  card.classList.toggle('deficit-active', isDeficit);
-  note.classList.toggle('show', isDeficit);
-  if (isDeficit) requestAnimationFrame(() => fitText(note, 10));
-
-  if (isDeficit) {
-    // 적자: 현재 weight 저장 후 0.0 고정
-    wEl.dataset.saved = wEl.value;
-    wEl.value = '0.0';
-    wEl.disabled = true;
-    wEl.style.opacity = '0.35';
-  } else {
-    // 흑자: 저장값 복원 (초기 저장값 없으면 0.7 기본값)
-    wEl.value = wEl.dataset.saved && wEl.dataset.saved !== '0.0'
-      ? wEl.dataset.saved : '0.7';
-    wEl.disabled = false;
-    wEl.style.opacity = '1';
-  }
-  updateAll();
+  const maxTotal = Math.max(memTotal만, comTotal만, lsiTotal만, fouTotal만, 1);
+  document.getElementById('mem-bar').style.width = (memTotal만/maxTotal*100).toFixed(1)+'%';
+  document.getElementById('com-bar').style.width = (comTotal만/maxTotal*100).toFixed(1)+'%';
+  document.getElementById('lsi-bar').style.width = (lsiTotal만/maxTotal*100).toFixed(1)+'%';
+  document.getElementById('fou-bar').style.width = (fouTotal만/maxTotal*100).toFixed(1)+'%';
 }
 
 function fitNoteTexts() {
@@ -919,27 +954,25 @@ function fitNoteTexts() {
 
 function toggleNote() {
   const toggle = document.getElementById('note-toggle');
-  const body = document.getElementById('note-body');
+  const body   = document.getElementById('note-body');
   toggle.classList.toggle('open');
   body.classList.toggle('open');
-  if (body.classList.contains('open')) {
-    requestAnimationFrame(fitNoteTexts);
-  }
+  if (body.classList.contains('open')) requestAnimationFrame(fitNoteTexts);
 }
 
 window.addEventListener('resize', () => {
-  if (document.getElementById('note-body').classList.contains('open')) {
-    fitNoteTexts();
-  }
+  if (document.getElementById('note-body').classList.contains('open')) fitNoteTexts();
 });
 
-// init
+// 초기화
 (function() {
-  const wEl = document.getElementById('fou-weight');
-  wEl.disabled = true;
-  wEl.style.opacity = '0.35';
-  const note = document.getElementById('fou-deficit-note');
-  requestAnimationFrame(() => fitText(note, 10));
+  ['lsi','fou'].forEach(type => {
+    const wEl = document.getElementById(type+'-weight');
+    wEl.disabled = true;
+    wEl.style.opacity = '0.35';
+    const note = document.getElementById(type+'-deficit-note');
+    requestAnimationFrame(() => fitText(note, 10));
+  });
 })();
 updateAll();
 </script>
