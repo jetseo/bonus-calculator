@@ -674,7 +674,7 @@
 <!-- 1인당 성과급 결과 -->
 <div class="card">
   <div class="card-header" onclick="toggleCard('card-results')">
-    <div class="card-label">1인당 성과급 결과</div>
+    <div class="card-label">1인당 성과급 결과 <span id="result-year-label" style="color:var(--yellow);font-weight:700;">(2026년)</span></div>
     <span class="card-chevron open" id="chevron-card-results">▼</span>
   </div>
   <div class="card-body open" id="card-results">
@@ -911,6 +911,10 @@ function updateAll() {
   }
 
   // 연도 안내
+  // 결과 카드 연도 라벨 갱신
+  const yrLabel = document.getElementById('result-year-label');
+  if (yrLabel) yrLabel.textContent = '(' + currentYear + (currentYear === 2026 ? '년)' : '년~)');
+
   const yrNote = document.getElementById('year-note');
   if (currentYear === 2026) {
     yrNote.innerHTML = '<span>2026년</span>: 적자 사업부는 사업부 재원 미지급 (적자조항은 2027년~)';
