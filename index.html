@@ -762,7 +762,7 @@ function selectYear(year) {
 
   const noteEl = document.getElementById('year-note');
   if (year === 2026) {
-    noteEl.innerHTML = '<span>2026년</span>: 적자조항 미적용 · 르팡은 부문 재원만 수령';
+    noteEl.innerHTML = '<span>2026년</span>: 적자조항 미적용 · 공통/르팡 동일 배분';
   } else {
     noteEl.innerHTML = '<span>2027년~</span>: 흑자 정상배분 / 적자 시 공통×60% 보장';
   }
@@ -808,7 +808,7 @@ function updateAll() {
   // 연도 탭 안내문구 갱신 (2026: 항상 부문만 / 2027: 흑자/적자 구분)
   const yrNote = document.getElementById('year-note');
   if (currentYear === 2026) {
-    yrNote.innerHTML = '<span>2026년</span>: 적자조항 미적용 · 르팡은 부문 재원만 수령';
+    yrNote.innerHTML = '<span>2026년</span>: 적자조항 미적용 · 공통/르팡 동일 배분';
   } else if (!isDeficit) {
     yrNote.innerHTML = '<span>2027년~</span>: 흑자 · 사업부 재원 정상 배분';
   } else {
@@ -831,9 +831,17 @@ function updateAll() {
   // 르팡 계산: 연도 + 적자 여부에 따라 분기
   let fouTotal만, fouBU표시만;
   if (currentYear === 2026) {
-    // 2026년: 적자/흑자 무관 → 부문 재원만 (사업부 재원 미지급)
-    fouTotal만  = perHeadDiv만;
-    fouBU표시만 = 0;
+    // 2026년: 나.4항 미적용 → 공통과 동일하게 배분 (비율 0.7)
+    // fouW를 comW(0.7)로 강제 적용해 재계산
+    const fouW2026 = comW;
+    const totalWHC2026 = memHC*memW + comHC*comW + fouHC*fouW2026;
+    const base2026만 = totalWHC2026 > 0 ? buPool만 / totalWHC2026 : 0;
+    const fouBU2026만 = base2026만 * fouW2026;
+    // 공통도 동일 pool로 재계산
+    const comBU2026만 = base2026만 * comW;
+    // 표시용으로 덮어쓰기
+    fouTotal만  = perHeadDiv만 + fouBU2026만;
+    fouBU표시만 = fouBU2026만;
   } else if (!isDeficit) {
     // 2027년~ 흑자: 사업부 재원 정상 배분
     fouTotal만  = perHeadDiv만 + fouBU만;
