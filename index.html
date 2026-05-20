@@ -475,6 +475,44 @@
     font-family: 'JetBrains Mono', monospace;
   }
   .year-note span { color: var(--yellow); }
+
+  /* ── 접이식 카드 ── */
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    margin-bottom: 0;
+  }
+  .card-header .card-label {
+    margin-bottom: 0;
+  }
+  .card-chevron {
+    font-size: 10px;
+    color: var(--muted);
+    transition: transform 0.3s;
+    flex-shrink: 0;
+  }
+  .card-chevron.open { transform: rotate(180deg); }
+  .card-body {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1),
+                opacity 0.3s ease,
+                margin-top 0.3s ease;
+    opacity: 0;
+    margin-top: 0;
+  }
+  .card-body.open {
+    max-height: 1000px;
+    opacity: 1;
+    margin-top: 16px;
+  }
+
+  /* 2026년 탭: 르팡 관련 불필요 요소 숨김 */
+  .year-2026-active .deficit-row { display: none !important; }
+  .year-2026-active .fou-weight-group { display: none !important; }
   /* responsive tweaks */
   @media (max-width: 400px) {
     .div-col-title { font-size: 12px; }
@@ -483,7 +521,7 @@
   }
 </style>
 </head>
-<body>
+<body class="year-2026-active">
 
 <div class="header">
   <h1>성과급 계산기</h1>
@@ -497,9 +535,72 @@
 </div>
 <div class="year-note" id="year-note"><span>2026년</span>: 적자조항 미적용 · 부문 재원만 수령</div>
 
+<!-- 사업부 설정 -->
+<div class="card">
+  <div class="card-header" onclick="toggleCard('card-settings')">
+    <div class="card-label">사업부 설정</div>
+    <span class="card-chevron open" id="chevron-card-settings">▼</span>
+  </div>
+  <div class="card-body open" id="card-settings">
+  <div class="div-grid">
+    <!-- Memory -->
+    <div class="div-col">
+      <div class="div-col-title memory">메모리</div>
+      <div class="input-group">
+        <label>인원 (명)</label>
+        <input type="number" id="mem-headcount" value="27400" oninput="updateAll()">
+      </div>
+      <div class="input-group">
+        <label>사업부 비율</label>
+        <input type="number" id="mem-weight" value="1.0" step="0.1" min="0" max="3" oninput="updateAll()">
+      </div>
+    </div>
+    <!-- Common -->
+    <div class="div-col">
+      <div class="div-col-title common">공통</div>
+      <div class="input-group">
+        <label>인원 (명)</label>
+        <input type="number" id="com-headcount" value="29000" oninput="updateAll()">
+      </div>
+      <div class="input-group">
+        <label>사업부 비율</label>
+        <input type="number" id="com-weight" value="0.7" step="0.1" min="0" max="3" oninput="updateAll()">
+      </div>
+    </div>
+    <!-- Foundry -->
+    <div class="div-col">
+      <div class="div-col-title foundry">르팡</div>
+      <div class="input-group">
+        <label>인원 (명)</label>
+        <input type="number" id="fou-headcount" value="20900" oninput="updateAll()">
+      </div>
+      <div class="input-group fou-weight-group">
+        <label>사업부 비율</label>
+        <input type="number" id="fou-weight" value="0.0" step="0.1" min="0" max="3" oninput="updateAll()">
+      </div>
+      <div class="deficit-row">
+        <div class="deficit-label">
+          적자 사업부
+          <span>공통×60% 적용</span>
+        </div>
+        <div class="toggle-wrap">
+          <span class="toggle-text deficit-on" id="deficit-text">적자</span>
+          <button class="toggle-btn on" id="deficit-btn" onclick="toggleDeficit()"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div><!-- /card-body -->
+</div>
+
+
 <!-- 주요 변수 -->
 <div class="card">
-  <div class="card-label">주요 변수</div>
+  <div class="card-header" onclick="toggleCard('card-vars')">
+    <div class="card-label">주요 변수</div>
+    <span class="card-chevron open" id="chevron-card-vars">▼</span>
+  </div>
+  <div class="card-body open" id="card-vars">
 
   <div class="slider-row">
     <div class="slider-top">
@@ -539,64 +640,16 @@
     <span class="total-label">총 재원</span>
     <span class="total-value" id="total-display">31.5조 <span class="total-sub">(315,000억원)</span></span>
   </div>
-</div>
-
-<!-- 사업부 설정 -->
-<div class="card">
-  <div class="card-label">사업부 설정</div>
-  <div class="div-grid">
-    <!-- Memory -->
-    <div class="div-col">
-      <div class="div-col-title memory">메모리</div>
-      <div class="input-group">
-        <label>인원 (명)</label>
-        <input type="number" id="mem-headcount" value="27400" oninput="updateAll()">
-      </div>
-      <div class="input-group">
-        <label>사업부 비율</label>
-        <input type="number" id="mem-weight" value="1.0" step="0.1" min="0" max="3" oninput="updateAll()">
-      </div>
-    </div>
-    <!-- Common -->
-    <div class="div-col">
-      <div class="div-col-title common">공통</div>
-      <div class="input-group">
-        <label>인원 (명)</label>
-        <input type="number" id="com-headcount" value="29000" oninput="updateAll()">
-      </div>
-      <div class="input-group">
-        <label>사업부 비율</label>
-        <input type="number" id="com-weight" value="0.7" step="0.1" min="0" max="3" oninput="updateAll()">
-      </div>
-    </div>
-    <!-- Foundry -->
-    <div class="div-col">
-      <div class="div-col-title foundry">르팡</div>
-      <div class="input-group">
-        <label>인원 (명)</label>
-        <input type="number" id="fou-headcount" value="20900" oninput="updateAll()">
-      </div>
-      <div class="input-group">
-        <label>사업부 비율</label>
-        <input type="number" id="fou-weight" value="0.0" step="0.1" min="0" max="3" oninput="updateAll()">
-      </div>
-      <div class="deficit-row">
-        <div class="deficit-label">
-          적자 사업부
-          <span>공통×60% 적용</span>
-        </div>
-        <div class="toggle-wrap">
-          <span class="toggle-text deficit-on" id="deficit-text">적자</span>
-          <button class="toggle-btn on" id="deficit-btn" onclick="toggleDeficit()"></button>
-        </div>
-      </div>
-    </div>
-  </div>
+  </div><!-- /card-body -->
 </div>
 
 <!-- 1인당 성과급 결과 -->
 <div class="card">
-  <div class="card-label">1인당 성과급 결과</div>
+  <div class="card-header" onclick="toggleCard('card-results')">
+    <div class="card-label">1인당 성과급 결과</div>
+    <span class="card-chevron open" id="chevron-card-results">▼</span>
+  </div>
+  <div class="card-body open" id="card-results">
   <div class="result-grid">
     <div class="result-card memory">
       <div class="result-name memory">메모리</div>
@@ -624,6 +677,7 @@
       <div class="result-bar"><div class="result-bar-fill" id="fou-bar" style="width:30%"></div></div>
     </div>
   </div>
+  </div><!-- /card-body -->
 </div>
 
 <!-- 참고 · 비교 -->
@@ -690,16 +744,27 @@ function updateSliderFill(el) {
 // 연도 상태: 2026(적자조항 미적용) / 2027(공통×60%)
 let currentYear = 2026;
 
+function toggleCard(id) {
+  const body    = document.getElementById(id);
+  const chevron = document.getElementById('chevron-' + id);
+  const isOpen  = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chevron.classList.toggle('open', !isOpen);
+}
+
 function selectYear(year) {
   currentYear = year;
   document.getElementById('year-2026').classList.toggle('active', year === 2026);
   document.getElementById('year-2027').classList.toggle('active', year === 2027);
 
+  // 2026년: 적자/흑자 토글 + 사업부 비율 숨김
+  document.body.classList.toggle('year-2026-active', year === 2026);
+
   const noteEl = document.getElementById('year-note');
   if (year === 2026) {
-    noteEl.innerHTML = '<span>2026년</span>: 적자조항 미적용 · 부문 재원만 수령';
+    noteEl.innerHTML = '<span>2026년</span>: 적자조항 미적용 · 르팡은 부문 재원만 수령';
   } else {
-    noteEl.innerHTML = '<span>2027년~</span>: 적자 시 공통 지급률 × 60% 적용';
+    noteEl.innerHTML = '<span>2027년~</span>: 흑자 정상배분 / 적자 시 공통×60% 보장';
   }
   updateAll();
 }
@@ -740,22 +805,14 @@ function updateAll() {
   // 적자면 르팡은 사업부 pool에서 제외
   const fouW = isDeficit ? 0 : fouWRaw;
 
-  // 연도 탭 활성/비활성 + 안내문구 갱신
-  const yr2026 = document.getElementById('year-2026');
-  const yr2027 = document.getElementById('year-2027');
+  // 연도 탭 안내문구 갱신 (2026: 항상 부문만 / 2027: 흑자/적자 구분)
   const yrNote = document.getElementById('year-note');
-  if (!isDeficit) {
-    yr2026.disabled = true;  yr2026.style.opacity = '0.4';
-    yr2027.disabled = true;  yr2027.style.opacity = '0.4';
-    yrNote.innerHTML = '흑자 시 연도 무관 · 사업부 재원 정상 배분';
+  if (currentYear === 2026) {
+    yrNote.innerHTML = '<span>2026년</span>: 적자조항 미적용 · 르팡은 부문 재원만 수령';
+  } else if (!isDeficit) {
+    yrNote.innerHTML = '<span>2027년~</span>: 흑자 · 사업부 재원 정상 배분';
   } else {
-    yr2026.disabled = false; yr2026.style.opacity = '1';
-    yr2027.disabled = false; yr2027.style.opacity = '1';
-    if (currentYear === 2026) {
-      yrNote.innerHTML = '<span>2026년</span>: 적자조항 미적용 · 부문 재원만 수령';
-    } else {
-      yrNote.innerHTML = '<span>2027년~</span>: 적자 시 공통 지급률 × 60% 적용';
-    }
+    yrNote.innerHTML = '<span>2027년~</span>: 적자 · 공통 지급률 × 60% 보장';
   }
 
   const totalHC     = memHC + comHC + fouHC;
@@ -773,19 +830,18 @@ function updateAll() {
 
   // 르팡 계산: 연도 + 적자 여부에 따라 분기
   let fouTotal만, fouBU표시만;
-  if (!isDeficit) {
-    // 흑자: 연도 무관하게 정상 배분
-    fouTotal만   = perHeadDiv만 + fouBU만;
-    fouBU표시만   = fouBU만;
-  } else if (currentYear === 2026) {
-    // 2026 적자: 조항 미적용 → 부문 재원만
-    fouTotal만   = perHeadDiv만;
-    fouBU표시만   = 0;
+  if (currentYear === 2026) {
+    // 2026년: 적자/흑자 무관 → 부문 재원만 (사업부 재원 미지급)
+    fouTotal만  = perHeadDiv만;
+    fouBU표시만 = 0;
+  } else if (!isDeficit) {
+    // 2027년~ 흑자: 사업부 재원 정상 배분
+    fouTotal만  = perHeadDiv만 + fouBU만;
+    fouBU표시만 = fouBU만;
   } else {
-    // 2027+ 적자: 공통 지급률(부문+사업부 합산 comTotal만) × 60%
-    // 르팡이 pool에서 빠진 상태의 comTotal만 기준
+    // 2027년~ 적자: 공통 지급률 × 60% 보장
     fouTotal만  = comTotal만 * 0.6;
-    fouBU표시만  = fouTotal만 - perHeadDiv만;
+    fouBU표시만 = fouTotal만 - perHeadDiv만;
   }
 
   function setResult(prefix, div만, bu만, tot만) {
