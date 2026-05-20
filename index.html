@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>성과급 계산기</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --card2: #1c2128;
+    --border: #30363d;
+    --blue: #58a6ff;
+    --cyan: #39d0d8;
+    --purple: #bc8cff;
+    --yellow: #e3b341;
+    --red: #f85149;
+    --green: #3fb950;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --memory-color: #58a6ff;
+    --common-color: #e3b341;
+    --foundry-color: #f85149;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    padding: 20px 16px 60px;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    padding: 28px 0 24px;
+    position: relative;
+  }
+  .header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    background: linear-gradient(90deg, var(--blue), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .header .badge {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 18px;
+    margin-bottom: 14px;
+  }
+  .card-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── Slider rows ── */
+  .slider-row {
+    margin-bottom: 18px;
+  }
+  .slider-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .slider-label { font-size: 14px; font-weight: 500; color: var(--text); }
+  .slider-value {
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .slider-value.blue { color: var(--blue); }
+  .slider-value.purple { color: var(--purple); }
+  .slider-value.yellow { color: var(--yellow); }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 5px;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range].blue-track { background: linear-gradient(to right, var(--blue) var(--pct, 0%), var(--border) var(--pct, 0%)); }
+  input[type=range].purple-track { background: linear-gradient(to right, var(--purple) var(--pct, 0%), var(--border) var(--pct, 0%)); }
+  input[type=range].yellow-track { background: linear-gradient(to right, var(--yellow) var(--pct, 0%), var(--border) var(--pct, 0%)); }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--text);
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 6px rgba(0,0,0,0.5);
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  input[type=range]:active::-webkit-slider-thumb { transform: scale(1.25); }
+
+  /* ratio slider ticks */
+  .ratio-ticks {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    padding: 0 2px;
+  }
+  .ratio-ticks span {
+    font-size: 10px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* total resource */
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+    margin-top: 6px;
+  }
+  .total-label { font-size: 13px; color: var(--muted); }
+  .total-value {
+    font-size: 17px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text);
+  }
+  .total-sub { font-size: 12px; color: var(--muted); font-weight: 400; }
+
+  /* ── Division section ── */
+  .div-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-top: 4px;
+  }
+  .div-col { }
+  .div-col-title {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .div-col-title.memory { color: var(--memory-color); }
+  .div-col-title.common { color: var(--common-color); }
+  .div-col-title.foundry { color: var(--foundry-color); }
+
+  .input-group { margin-bottom: 10px; }
+  .input-group label {
+    display: block;
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .input-group input[type=number] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 8px 10px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-group input[type=number]:focus { border-color: var(--blue); }
+  .input-group input[type=number]::-webkit-inner-spin-button { opacity: 0.4; }
+
+  /* ratio display on div section */
+  .ratio-display {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 5px;
+  }
+  .ratio-display span { color: var(--yellow); font-weight: 700; }
+
+  /* ── Results ── */
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .result-card {
+    background: var(--card2);
+    border-radius: 12px;
+    padding: 14px 12px;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .result-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .result-card.memory::after { background: var(--memory-color); }
+  .result-card.common::after { background: var(--common-color); }
+  .result-card.foundry::after { background: var(--foundry-color); }
+
+  .result-name {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .result-name.memory { color: var(--memory-color); }
+  .result-name.common { color: var(--common-color); }
+  .result-name.foundry { color: var(--foundry-color); }
+
+  .result-line {
+    font-size: 10px;
+    color: var(--muted);
+    line-height: 1.6;
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 4px;
+    overflow: hidden;
+  }
+  .result-line .line-label {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .result-line b {
+    color: var(--text);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    min-width: 0;
+    display: inline-block;
+    width: 100%;
+    text-align: right;
+  }
+
+  .result-total {
+    margin-top: 10px;
+    font-size: 16px;
+    font-weight: 900;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    width: 100%;
+  }
+  .result-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* progress bar inside result */
+  .result-bar {
+    height: 3px;
+    border-radius: 2px;
+    margin-top: 8px;
+    background: var(--border);
+    overflow: hidden;
+  }
+  .result-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+  }
+  .memory .result-bar-fill { background: var(--memory-color); }
+  .common .result-bar-fill { background: var(--common-color); }
+  .foundry .result-bar-fill { background: var(--foundry-color); }
+
+  /* ── Reference/note section ── */
+  .note-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .note-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 18px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .note-toggle .arrow { transition: transform 0.3s; font-size: 10px; }
+  .note-toggle.open .arrow { transform: rotate(180deg); }
+  .note-body {
+    display: none;
+    padding: 0 18px 18px;
+    border-top: 1px solid var(--border);
+  }
+  .note-body.open { display: block; }
+
+  .note-item {
+    padding: 10px 0;
+    border-bottom: 1px solid #21262d;
+    color: var(--muted);
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    overflow: hidden;
+  }
+  .note-item:last-child { border-bottom: none; }
+  .note-item strong { color: var(--text); font-weight: 600; }
+  .note-item .tag {
+    display: inline-block;
+    flex-shrink: 0;
+    background: #21262d;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 10px;
+    color: var(--cyan);
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+  }
+  .note-text {
+    font-size: 12px;
+    line-height: 1.5;
+    white-space: nowrap;
+    overflow: hidden;
+    min-width: 0;
+    flex: 1;
+  }
+
+
+  /* ── 적자 토글 ── */
+  .deficit-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 8px 10px;
+    background: #1a1a2a;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+  }
+  .deficit-label {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.4;
+    text-align: center;
+  }
+  .deficit-label span {
+    display: block;
+    font-size: 10px;
+    color: #555;
+    margin-top: 2px;
+  }
+  .toggle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    align-self: center;
+  }
+  .toggle-wrap .toggle-text {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    min-width: 28px;
+    text-align: right;
+  }
+  .toggle-wrap .toggle-text.deficit-on { color: var(--red); }
+  .toggle-wrap .toggle-text.deficit-off { color: var(--green); }
+  .toggle-btn {
+    position: relative;
+    width: 40px;
+    height: 22px;
+    border-radius: 11px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.25s;
+    background: var(--green);
+    flex-shrink: 0;
+  }
+  .toggle-btn.on { background: var(--red); }
+  .toggle-btn::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: white;
+    transition: transform 0.25s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  }
+  .toggle-btn.on::after { transform: translateX(18px); }
+
+  /* 적자 카드 dimming */
+  .result-card.deficit-active {
+    opacity: 0.7;
+  }
+  .result-card.deficit-active .result-name.foundry::after {
+    content: ' 〔적자〕';
+    font-size: 9px;
+    color: var(--red);
+    font-weight: 400;
+  }
+  .deficit-note {
+    font-size: 10px;
+    color: var(--red);
+    margin-top: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    display: none;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 100%;
+  }
+  .deficit-note.show { display: block; }
+
+  /* ── 연도 선택 탭 ── */
+  .year-tab-wrap {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .year-tab {
+    flex: 1;
+    padding: 10px 0;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card2);
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .year-tab.active {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #000;
+  }
+  .year-tab:not(.active):hover {
+    border-color: var(--blue);
+    color: var(--text);
+  }
+  .year-note {
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: -8px;
+    margin-bottom: 10px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .year-note span { color: var(--yellow); }
+  /* responsive tweaks */
+  @media (max-width: 400px) {
+    .div-col-title { font-size: 12px; }
+    .result-total { font-size: 14px; }
+    .result-line { font-size: 9px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>성과급 계산기</h1>
+  <div class="badge">DS부문 · 2026년 노사 잠정 합의서 기준</div>
+</div>
+
+<!-- 연도 선택 -->
+<div class="year-tab-wrap">
+  <button class="year-tab active" id="year-2026" onclick="selectYear(2026)">2026년</button>
+  <button class="year-tab" id="year-2027" onclick="selectYear(2027)">2027년~</button>
+</div>
+<div class="year-note" id="year-note"><span>2026년</span>: 적자조항 미적용 · 부문 재원만 수령</div>
+
+<!-- 주요 변수 -->
+<div class="card">
+  <div class="card-label">주요 변수</div>
+
+  <div class="slider-row">
+    <div class="slider-top">
+      <span class="slider-label">영업이익</span>
+      <span class="slider-value blue" id="oi-display">300조</span>
+    </div>
+    <input type="range" id="oi-slider" class="blue-track"
+      min="100" max="500" step="10" value="300"
+      oninput="updateAll()">
+  </div>
+
+  <div class="slider-row">
+    <div class="slider-top">
+      <span class="slider-label">성과급 재원 비율</span>
+      <span class="slider-value purple" id="rate-display">10.5%</span>
+    </div>
+    <input type="range" id="rate-slider" class="purple-track"
+      min="5" max="20" step="0.5" value="10.5"
+      oninput="updateAll()">
+  </div>
+
+  <div class="slider-row">
+    <div class="slider-top">
+      <span class="slider-label">부문 : 사업부</span>
+      <span class="slider-value yellow" id="ratio-display">4 : 6</span>
+    </div>
+    <input type="range" id="ratio-slider" class="yellow-track"
+      min="0" max="10" step="1" value="4"
+      oninput="updateAll()">
+    <div class="ratio-ticks">
+      <span>0:10</span><span>2:8</span><span>4:6</span>
+      <span>5:5</span><span>6:4</span><span>8:2</span><span>10:0</span>
+    </div>
+  </div>
+
+  <div class="total-row">
+    <span class="total-label">총 재원</span>
+    <span class="total-value" id="total-display">31.5조 <span class="total-sub">(315,000억원)</span></span>
+  </div>
+</div>
+
+<!-- 사업부 설정 -->
+<div class="card">
+  <div class="card-label">사업부 설정</div>
+  <div class="div-grid">
+    <!-- Memory -->
+    <div class="div-col">
+      <div class="div-col-title memory">메모리</div>
+      <div class="input-group">
+        <label>인원 (명)</label>
+        <input type="number" id="mem-headcount" value="27400" oninput="updateAll()">
+      </div>
+      <div class="input-group">
+        <label>사업부 비율</label>
+        <input type="number" id="mem-weight" value="1.0" step="0.1" min="0" max="3" oninput="updateAll()">
+      </div>
+    </div>
+    <!-- Common -->
+    <div class="div-col">
+      <div class="div-col-title common">공통</div>
+      <div class="input-group">
+        <label>인원 (명)</label>
+        <input type="number" id="com-headcount" value="29000" oninput="updateAll()">
+      </div>
+      <div class="input-group">
+        <label>사업부 비율</label>
+        <input type="number" id="com-weight" value="0.7" step="0.1" min="0" max="3" oninput="updateAll()">
+      </div>
+    </div>
+    <!-- Foundry -->
+    <div class="div-col">
+      <div class="div-col-title foundry">르팡</div>
+      <div class="input-group">
+        <label>인원 (명)</label>
+        <input type="number" id="fou-headcount" value="20900" oninput="updateAll()">
+      </div>
+      <div class="input-group">
+        <label>사업부 비율</label>
+        <input type="number" id="fou-weight" value="0.0" step="0.1" min="0" max="3" oninput="updateAll()">
+      </div>
+      <div class="deficit-row">
+        <div class="deficit-label">
+          적자 사업부
+          <span>공통×60% 적용</span>
+        </div>
+        <div class="toggle-wrap">
+          <span class="toggle-text deficit-on" id="deficit-text">적자</span>
+          <button class="toggle-btn on" id="deficit-btn" onclick="toggleDeficit()"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 1인당 성과급 결과 -->
+<div class="card">
+  <div class="card-label">1인당 성과급 결과</div>
+  <div class="result-grid">
+    <div class="result-card memory">
+      <div class="result-name memory">메모리</div>
+      <div class="result-line"><span class="line-label">부문</span><b id="mem-div-part">-</b></div>
+      <div class="result-line"><span class="line-label">사업부</span><b id="mem-bu-part">-</b></div>
+      <div class="result-total" id="mem-total">-</div>
+      <div class="result-sub" id="mem-sub">-</div>
+      <div class="result-bar"><div class="result-bar-fill" id="mem-bar" style="width:100%"></div></div>
+    </div>
+    <div class="result-card common">
+      <div class="result-name common">공통</div>
+      <div class="result-line"><span class="line-label">부문</span><b id="com-div-part">-</b></div>
+      <div class="result-line"><span class="line-label">사업부</span><b id="com-bu-part">-</b></div>
+      <div class="result-total" id="com-total">-</div>
+      <div class="result-sub" id="com-sub">-</div>
+      <div class="result-bar"><div class="result-bar-fill" id="com-bar" style="width:75%"></div></div>
+    </div>
+    <div class="result-card foundry deficit-active" id="fou-card">
+      <div class="result-name foundry" id="fou-name">르팡</div>
+      <div class="result-line"><span class="line-label">부문</span><b id="fou-div-part">-</b></div>
+      <div class="result-line"><span class="line-label">사업부</span><b id="fou-bu-part">-</b></div>
+      <div class="result-total" id="fou-total">-</div>
+      <div class="result-sub" id="fou-sub">-</div>
+      <div class="deficit-note show" id="fou-deficit-note">공통 지급률 × 60%</div>
+      <div class="result-bar"><div class="result-bar-fill" id="fou-bar" style="width:30%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 참고 · 비교 -->
+<div class="note-section">
+  <div class="note-toggle" id="note-toggle" onclick="toggleNote()">
+    참고 · 합의서 주요 내용
+    <span class="arrow">▼</span>
+  </div>
+  <div class="note-body" id="note-body">
+    <div class="note-item">
+      <span class="tag">재원</span><span class="note-text"><strong>DS부문 특별경영성과급</strong> 재원 = 노사 합의 선정 사업성과의 <strong>10.5%</strong></span>
+    </div>
+    <div class="note-item">
+      <span class="tag">배분</span><span class="note-text">재원의 <strong>부문 40% / 사업부 60%</strong> 배분. 공통조직 지급률은 메모리사업부 지급률의 <strong>70%</strong> 수준.</span>
+    </div>
+    <div class="note-item">
+      <span class="tag">지급</span><span class="note-text">세후 전액 <strong>자사주</strong>로 지급. 1/3 즉시 매각 가능 / 1/3 1년 제한 / 1/3 2년 제한.</span>
+    </div>
+    <div class="note-item">
+      <span class="tag">조건</span><span class="note-text">DS부문 영업이익 <strong>200조원</strong>(2026~2028년) 또는 <strong>100조원</strong>(2029~2035년) 달성 시 지급.</span>
+    </div>
+    <div class="note-item">
+      <span class="tag">적자</span><span class="note-text">당해 적자사업부는 공통 지급률의 <strong>60%</strong> 지급 (2027년분부터 적용).</span>
+    </div>
+    <div class="note-item">
+      <span class="tag">임금</span><span class="note-text">2026년 기준인상률 <strong>4.1%</strong>, 성과인상률 평균 <strong>2.1%</strong> (CL·고과별 차등).</span>
+    </div>
+    <div class="note-item">
+      <span class="tag">셀러리캡</span><span class="note-text">CL4 → 1.30억 / CL3 → 1.10억 / CL2 → 0.80억으로 상향.</span>
+    </div>
+    <div class="note-item">
+      <span class="tag">자사주</span><span class="note-text">DX부문·CSS사업팀: 600만원 상당 자사주 지급 (상생협력 조항).</span>
+    </div>
+  </div>
+</div>
+
+<script>
+function fmt만(val) {
+  // val in 만원 → always show 만원 with comma
+  return Math.round(val).toLocaleString() + '만원';
+}
+
+function fitText(el, startSize) {
+  // shrink font until text fits without wrapping
+  let size = startSize || 16;
+  el.style.fontSize = size + 'px';
+  // requestAnimationFrame 없이 즉시 측정 가능하도록 display:inline-block 보장
+  while (el.scrollWidth > el.offsetWidth && size > 7) {
+    size -= 0.5;
+    el.style.fontSize = size + 'px';
+  }
+}
+function fmtEok(val) {
+  // val in 만원 → 1억 = 10,000만
+  return '≈ ' + (val / 10000).toFixed(1) + '억';
+}
+
+function updateSliderFill(el) {
+  const min = parseFloat(el.min), max = parseFloat(el.max), val = parseFloat(el.value);
+  const pct = ((val - min) / (max - min)) * 100;
+  el.style.setProperty('--pct', pct + '%');
+}
+
+// 연도 상태: 2026(적자조항 미적용) / 2027(공통×60%)
+let currentYear = 2026;
+
+function selectYear(year) {
+  currentYear = year;
+  document.getElementById('year-2026').classList.toggle('active', year === 2026);
+  document.getElementById('year-2027').classList.toggle('active', year === 2027);
+
+  const noteEl = document.getElementById('year-note');
+  if (year === 2026) {
+    noteEl.innerHTML = '<span>2026년</span>: 적자조항 미적용 · 부문 재원만 수령';
+  } else {
+    noteEl.innerHTML = '<span>2027년~</span>: 적자 시 공통 지급률 × 60% 적용';
+  }
+  updateAll();
+}
+
+function updateAll() {
+  const oiSlider    = document.getElementById('oi-slider');
+  const rateSlider  = document.getElementById('rate-slider');
+  const ratioSlider = document.getElementById('ratio-slider');
+  [oiSlider, rateSlider, ratioSlider].forEach(updateSliderFill);
+
+  const oi       = parseFloat(oiSlider.value);
+  const rate     = parseFloat(rateSlider.value);
+  const divRatio = parseInt(ratioSlider.value);
+  const buRatio  = 10 - divRatio;
+
+  document.getElementById('oi-display').textContent    = oi + '조';
+  document.getElementById('rate-display').textContent  = rate.toFixed(1) + '%';
+  document.getElementById('ratio-display').textContent = divRatio + ' : ' + buRatio;
+
+  const total조 = oi * rate / 100;
+  const total억 = total조 * 10000;
+  const total만 = total억 * 10000;
+
+  document.getElementById('total-display').innerHTML =
+    total조.toFixed(1) + '조 <span class="total-sub">(' + Math.round(total억).toLocaleString() + '억원)</span>';
+
+  const divPool만 = total만 * divRatio / 10;
+  const buPool만  = total만 * buRatio  / 10;
+
+  const memHC = parseInt(document.getElementById('mem-headcount').value) || 1;
+  const comHC = parseInt(document.getElementById('com-headcount').value) || 1;
+  const fouHC = parseInt(document.getElementById('fou-headcount').value) || 1;
+  const memW  = parseFloat(document.getElementById('mem-weight').value)  || 0;
+  const comW  = parseFloat(document.getElementById('com-weight').value)  || 0;
+  const fouWRaw = parseFloat(document.getElementById('fou-weight').value) || 0;
+
+  const isDeficit = document.getElementById('deficit-btn').classList.contains('on');
+  // 적자면 르팡은 사업부 pool에서 제외
+  const fouW = isDeficit ? 0 : fouWRaw;
+
+  // 연도 탭 활성/비활성 + 안내문구 갱신
+  const yr2026 = document.getElementById('year-2026');
+  const yr2027 = document.getElementById('year-2027');
+  const yrNote = document.getElementById('year-note');
+  if (!isDeficit) {
+    yr2026.disabled = true;  yr2026.style.opacity = '0.4';
+    yr2027.disabled = true;  yr2027.style.opacity = '0.4';
+    yrNote.innerHTML = '흑자 시 연도 무관 · 사업부 재원 정상 배분';
+  } else {
+    yr2026.disabled = false; yr2026.style.opacity = '1';
+    yr2027.disabled = false; yr2027.style.opacity = '1';
+    if (currentYear === 2026) {
+      yrNote.innerHTML = '<span>2026년</span>: 적자조항 미적용 · 부문 재원만 수령';
+    } else {
+      yrNote.innerHTML = '<span>2027년~</span>: 적자 시 공통 지급률 × 60% 적용';
+    }
+  }
+
+  const totalHC     = memHC + comHC + fouHC;
+  const perHeadDiv만 = divPool만 / totalHC;
+
+  const totalWHC    = memHC*memW + comHC*comW + fouHC*fouW;
+  const base만       = totalWHC > 0 ? buPool만 / totalWHC : 0;
+
+  const memBU만 = base만 * memW;
+  const comBU만 = base만 * comW;
+  const fouBU만 = base만 * fouW;
+
+  const memTotal만 = perHeadDiv만 + memBU만;
+  const comTotal만 = perHeadDiv만 + comBU만;
+
+  // 르팡 계산: 연도 + 적자 여부에 따라 분기
+  let fouTotal만, fouBU표시만;
+  if (!isDeficit) {
+    // 흑자: 연도 무관하게 정상 배분
+    fouTotal만   = perHeadDiv만 + fouBU만;
+    fouBU표시만   = fouBU만;
+  } else if (currentYear === 2026) {
+    // 2026 적자: 조항 미적용 → 부문 재원만
+    fouTotal만   = perHeadDiv만;
+    fouBU표시만   = 0;
+  } else {
+    // 2027+ 적자: 공통 지급률(부문+사업부 합산 comTotal만) × 60%
+    // 르팡이 pool에서 빠진 상태의 comTotal만 기준
+    fouTotal만  = comTotal만 * 0.6;
+    fouBU표시만  = fouTotal만 - perHeadDiv만;
+  }
+
+  function setResult(prefix, div만, bu만, tot만) {
+    const divEl = document.getElementById(prefix+'-div-part');
+    const buEl  = document.getElementById(prefix+'-bu-part');
+    divEl.textContent = fmt만(div만);
+    buEl.textContent  = fmt만(bu만);
+    fitText(divEl, 10);
+    fitText(buEl,  10);
+    const totalEl = document.getElementById(prefix+'-total');
+    totalEl.textContent = Math.round(tot만).toLocaleString() + '만원';
+    fitText(totalEl, 16);
+    document.getElementById(prefix+'-sub').textContent = fmtEok(tot만);
+  }
+
+  setResult('mem', perHeadDiv만, memBU만, memTotal만);
+  setResult('com', perHeadDiv만, comBU만, comTotal만);
+  setResult('fou', perHeadDiv만, fouBU표시만, fouTotal만);
+
+  const maxTotal = Math.max(memTotal만, comTotal만, fouTotal만, 1);
+  document.getElementById('mem-bar').style.width = (memTotal만/maxTotal*100).toFixed(1) + '%';
+  document.getElementById('com-bar').style.width = (comTotal만/maxTotal*100).toFixed(1) + '%';
+  document.getElementById('fou-bar').style.width = (fouTotal만/maxTotal*100).toFixed(1) + '%';
+}
+
+function toggleDeficit() {
+  const btn  = document.getElementById('deficit-btn');
+  const txt  = document.getElementById('deficit-text');
+  const card = document.getElementById('fou-card');
+  const note = document.getElementById('fou-deficit-note');
+  const wEl  = document.getElementById('fou-weight');
+
+  btn.classList.toggle('on');
+  const isDeficit = btn.classList.contains('on');
+
+  txt.textContent = isDeficit ? '적자' : '흑자';
+  txt.className   = 'toggle-text ' + (isDeficit ? 'deficit-on' : 'deficit-off');
+  card.classList.toggle('deficit-active', isDeficit);
+  note.classList.toggle('show', isDeficit);
+  if (isDeficit) requestAnimationFrame(() => fitText(note, 10));
+
+  if (isDeficit) {
+    // 적자: 현재 weight 저장 후 0.0 고정
+    wEl.dataset.saved = wEl.value;
+    wEl.value = '0.0';
+    wEl.disabled = true;
+    wEl.style.opacity = '0.35';
+  } else {
+    // 흑자: 저장값 복원 (초기 저장값 없으면 0.7 기본값)
+    wEl.value = wEl.dataset.saved && wEl.dataset.saved !== '0.0'
+      ? wEl.dataset.saved : '0.7';
+    wEl.disabled = false;
+    wEl.style.opacity = '1';
+  }
+  updateAll();
+}
+
+function fitNoteTexts() {
+  document.querySelectorAll('.note-text').forEach(el => {
+    let size = 12;
+    el.style.fontSize = size + 'px';
+    while (el.scrollWidth > el.offsetWidth && size > 8) {
+      size -= 0.3;
+      el.style.fontSize = size + 'px';
+    }
+  });
+}
+
+function toggleNote() {
+  const toggle = document.getElementById('note-toggle');
+  const body = document.getElementById('note-body');
+  toggle.classList.toggle('open');
+  body.classList.toggle('open');
+  if (body.classList.contains('open')) {
+    requestAnimationFrame(fitNoteTexts);
+  }
+}
+
+window.addEventListener('resize', () => {
+  if (document.getElementById('note-body').classList.contains('open')) {
+    fitNoteTexts();
+  }
+});
+
+// init
+(function() {
+  const wEl = document.getElementById('fou-weight');
+  wEl.disabled = true;
+  wEl.style.opacity = '0.35';
+  const note = document.getElementById('fou-deficit-note');
+  requestAnimationFrame(() => fitText(note, 10));
+})();
+updateAll();
+</script>
+</body>
+</html>
