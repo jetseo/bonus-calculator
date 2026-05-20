@@ -801,53 +801,52 @@ function updateAll() {
   const comW  = parseFloat(document.getElementById('com-weight').value)  || 0;
   const fouWRaw = parseFloat(document.getElementById('fou-weight').value) || 0;
 
+  // 2026: LSI/파운드리 현재 적자 → 사업부 60%는 메모리+공통만 배분
+  // 2027+: 흑자면 정상배분, 적자면 공통×60%
+  // isDeficit: 르팡(시스템LSI 포함) 적자 여부
   const isDeficit = document.getElementById('deficit-btn').classList.contains('on');
-  // 적자면 르팡은 사업부 pool에서 제외
-  const fouW = isDeficit ? 0 : fouWRaw;
 
-  // 연도 탭 안내문구 갱신 (2026: 항상 부문만 / 2027: 흑자/적자 구분)
+  // 연도 안내문구
   const yrNote = document.getElementById('year-note');
   if (currentYear === 2026) {
-    yrNote.innerHTML = '<span>2026년</span>: 적자조항 미적용 · 공통/르팡 동일 배분';
+    yrNote.innerHTML = '<span>2026년</span>: LSI·파운드리 적자 → 사업부분은 메모리·공통만 배분';
   } else if (!isDeficit) {
     yrNote.innerHTML = '<span>2027년~</span>: 흑자 · 사업부 재원 정상 배분';
   } else {
     yrNote.innerHTML = '<span>2027년~</span>: 적자 · 공통 지급률 × 60% 보장';
   }
 
+  // 부문 40%: DS부문 전 직원 균등
   const totalHC     = memHC + comHC + fouHC;
   const perHeadDiv만 = divPool만 / totalHC;
 
-  const totalWHC    = memHC*memW + comHC*comW + fouHC*fouW;
-  const base만       = totalWHC > 0 ? buPool만 / totalWHC : 0;
+  // 사업부 60% 계산
+  // 2026년 또는 2027+ 적자: 르팡은 pool 제외(fouW=0)
+  // 2027+ 흑자: fouWRaw 사용
+  const fouW = (currentYear === 2026 || isDeficit) ? 0 : fouWRaw;
+
+  const totalWHC = memHC*memW + comHC*comW + fouHC*fouW;
+  const base만    = totalWHC > 0 ? buPool만 / totalWHC : 0;
 
   const memBU만 = base만 * memW;
   const comBU만 = base만 * comW;
-  const fouBU만 = base만 * fouW;
+  const fouBU만 = base만 * fouW;  // 2026/적자면 0
 
   const memTotal만 = perHeadDiv만 + memBU만;
   const comTotal만 = perHeadDiv만 + comBU만;
 
-  // 르팡 계산: 연도 + 적자 여부에 따라 분기
+  // 르팡 최종 계산
   let fouTotal만, fouBU표시만;
-  if (currentYear === 2026) {
-    // 2026년: 나.4항 미적용 → 공통과 동일하게 배분 (비율 0.7)
-    // fouW를 comW(0.7)로 강제 적용해 재계산
-    const fouW2026 = comW;
-    const totalWHC2026 = memHC*memW + comHC*comW + fouHC*fouW2026;
-    const base2026만 = totalWHC2026 > 0 ? buPool만 / totalWHC2026 : 0;
-    const fouBU2026만 = base2026만 * fouW2026;
-    // 공통도 동일 pool로 재계산
-    const comBU2026만 = base2026만 * comW;
-    // 표시용으로 덮어쓰기
-    fouTotal만  = perHeadDiv만 + fouBU2026만;
-    fouBU표시만 = fouBU2026만;
+  if (currentYear === 2026 || (currentYear !== 2026 && isDeficit === false && fouW === 0)) {
+    // 2026년: 부문분만
+    fouTotal만  = perHeadDiv만;
+    fouBU표시만 = 0;
   } else if (!isDeficit) {
-    // 2027년~ 흑자: 사업부 재원 정상 배분
+    // 2027년~ 흑자: 정상 배분
     fouTotal만  = perHeadDiv만 + fouBU만;
     fouBU표시만 = fouBU만;
   } else {
-    // 2027년~ 적자: 공통 지급률 × 60% 보장
+    // 2027년~ 적자: 공통 지급률 × 60%
     fouTotal만  = comTotal만 * 0.6;
     fouBU표시만 = fouTotal만 - perHeadDiv만;
   }
