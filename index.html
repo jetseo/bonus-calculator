@@ -862,8 +862,10 @@ function updateAll() {
 
   // 2026년: 적자조항 미적용, 그러나 현재 실제 적자이므로 사업부 pool 제외
   // 2027~: 토글에 따라 결정
-  const lsiIsOut = (currentYear === 2026) ? lsiDeficit : lsiDeficit;
-  const fouIsOut = (currentYear === 2026) ? fouDeficit : fouDeficit;
+  // 2026년: 토글 무관하게 항상 pool 제외 (적자조항 미적용이지만 실제 적자)
+  // 2027년~: 토글에 따라 결정
+  const lsiIsOut = (currentYear === 2026) ? true : lsiDeficit;
+  const fouIsOut = (currentYear === 2026) ? true : fouDeficit;
   const lsiW = lsiIsOut ? 0 : lsiWRaw;
   const fouW = fouIsOut ? 0 : fouWRaw;
 
