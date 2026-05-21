@@ -1029,30 +1029,30 @@ function updateAll() {
   document.getElementById('opi-display').textContent    = Math.round(opiRate*100) + '%';
 
   function setResult(prefix, div만, bu만, tot만) {
+    // 부문 / 사업부 내역
     const divEl = document.getElementById(prefix+'-div-part');
     const buEl  = document.getElementById(prefix+'-bu-part');
     divEl.textContent = fmt만(div만);
     buEl.textContent  = fmt만(bu만);
     fitText(divEl, 10);
     fitText(buEl,  10);
-    const totalEl = document.getElementById(prefix+'-total');
-    totalEl.textContent = Math.round(tot만).toLocaleString() + '만원';
-    fitText(totalEl, 16);
-    document.getElementById(prefix+'-sub').textContent = fmtEok(tot만);
 
-    // OPI + DS특별 + 합계
+    // OPI / DS특별성과급
     const grand만 = opi만 + tot만;
-    const opiEl   = document.getElementById(prefix+'-opi');
-    const dsEl    = document.getElementById(prefix+'-ds');
-    const grandEl = document.getElementById(prefix+'-grand');
+    const opiEl = document.getElementById(prefix+'-opi');
+    const dsEl  = document.getElementById(prefix+'-ds');
     if (opiEl) {
-      opiEl.textContent   = fmt만(opi만);
+      opiEl.textContent = fmt만(opi만);
       fitText(opiEl, 10);
-      dsEl.textContent    = fmt만(tot만);
-      fitText(dsEl, 10);
-      grandEl.textContent = fmt만(grand만);
-      fitText(grandEl, 10);
+      dsEl.textContent  = fmt만(tot만);
+      fitText(dsEl,  10);
     }
+
+    // 합계 (OPI + DS특별) → result-total에 표시
+    const totalEl = document.getElementById(prefix+'-total');
+    totalEl.textContent = Math.round(grand만).toLocaleString() + '만원';
+    fitText(totalEl, 16);
+    document.getElementById(prefix+'-sub').textContent = fmtEok(grand만);
   }
 
   setResult('mem', perHeadDiv만, memBU만,    memTotal만);
@@ -1060,11 +1060,12 @@ function updateAll() {
   setResult('lsi', perHeadDiv만, lsiBU표시만, lsiTotal만);
   setResult('fou', perHeadDiv만, fouBU표시만, fouTotal만);
 
-  const maxTotal = Math.max(memTotal만, comTotal만, lsiTotal만, fouTotal만, 1);
-  document.getElementById('mem-bar').style.width = (memTotal만/maxTotal*100).toFixed(1)+'%';
-  document.getElementById('com-bar').style.width = (comTotal만/maxTotal*100).toFixed(1)+'%';
-  document.getElementById('lsi-bar').style.width = (lsiTotal만/maxTotal*100).toFixed(1)+'%';
-  document.getElementById('fou-bar').style.width = (fouTotal만/maxTotal*100).toFixed(1)+'%';
+  const memGrand만 = opi만+memTotal만, comGrand만 = opi만+comTotal만, lsiGrand만 = opi만+lsiTotal만, fouGrand만 = opi만+fouTotal만;
+  const maxTotal = Math.max(memGrand만, comGrand만, lsiGrand만, fouGrand만, 1);
+  document.getElementById('mem-bar').style.width = (memGrand만/maxTotal*100).toFixed(1)+'%';
+  document.getElementById('com-bar').style.width = (comGrand만/maxTotal*100).toFixed(1)+'%';
+  document.getElementById('lsi-bar').style.width = (lsiGrand만/maxTotal*100).toFixed(1)+'%';
+  document.getElementById('fou-bar').style.width = (fouGrand만/maxTotal*100).toFixed(1)+'%';
 }
 
 function fitNoteTexts() {
