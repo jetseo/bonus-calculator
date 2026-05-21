@@ -578,6 +578,74 @@
     line-height: 1.5;
     font-style: italic;
   }
+
+  /* ── 라이트 모드 ── */
+  body.light {
+    --bg: #f5f7fa;
+    --card: #ffffff;
+    --card2: #f0f2f5;
+    --border: #d0d7de;
+    --text: #1a1f2e;
+    --muted: #57606a;
+    --blue: #0969da;
+    --cyan: #0a7b8c;
+    --purple: #7c3aed;
+    --yellow: #b45309;
+    --red: #cf222e;
+    --green: #1a7f37;
+    --memory-color: #0969da;
+    --common-color: #b45309;
+    --foundry-color: #cf222e;
+    --lsi-color: #7c3aed;
+  }
+  body.light input[type=range] { filter: none; }
+  body.light .toggle-btn { border: 1px solid var(--border); }
+  body.light input[type=number] { color: var(--text); }
+
+  /* ── 테마 토글 버튼 ── */
+  .theme-toggle {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 10px 5px 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .theme-toggle .theme-icon { font-size: 14px; line-height: 1; }
+  .theme-toggle .theme-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+  }
+  .theme-toggle-switch {
+    width: 32px;
+    height: 18px;
+    border-radius: 9px;
+    background: var(--border);
+    position: relative;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .theme-toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--text);
+    transition: transform 0.2s;
+  }
+  body.light .theme-toggle-switch { background: var(--blue); }
+  body.light .theme-toggle-switch::after { transform: translateX(14px); background: #fff; }
   /* responsive tweaks */
   @media (max-width: 400px) {
     .div-col-title { font-size: 12px; }
@@ -587,6 +655,12 @@
 </style>
 </head>
 <body class="year-2026-active">
+
+<button class="theme-toggle" onclick="toggleTheme()" title="테마 변경">
+  <span class="theme-icon" id="theme-icon">🌙</span>
+  <span class="theme-label" id="theme-label">다크</span>
+  <div class="theme-toggle-switch"></div>
+</button>
 
 <div class="header">
   <h1>성과급 계산기</h1>
@@ -871,6 +945,22 @@ function updateSliderFill(el) {
 }
 
 let currentYear = 2026;
+
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light');
+  document.getElementById('theme-icon').textContent  = isLight ? '☀️' : '🌙';
+  document.getElementById('theme-label').textContent = isLight ? '라이트' : '다크';
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+}
+
+// 저장된 테마 복원
+(function() {
+  if (localStorage.getItem('theme') === 'light') {
+    document.body.classList.add('light');
+    document.getElementById('theme-icon').textContent  = '☀️';
+    document.getElementById('theme-label').textContent = '라이트';
+  }
+})();
 
 function selectYear(year) {
   currentYear = year;
