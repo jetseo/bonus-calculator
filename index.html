@@ -579,73 +579,97 @@
     font-style: italic;
   }
 
-  /* ── 라이트 모드 ── */
-  body.light {
-    --bg: #f5f7fa;
-    --card: #ffffff;
-    --card2: #f0f2f5;
-    --border: #d0d7de;
-    --text: #1a1f2e;
-    --muted: #57606a;
-    --blue: #0969da;
-    --cyan: #0a7b8c;
-    --purple: #7c3aed;
-    --yellow: #b45309;
-    --red: #cf222e;
-    --green: #1a7f37;
-    --memory-color: #0969da;
-    --common-color: #b45309;
-    --foundry-color: #cf222e;
-    --lsi-color: #7c3aed;
+  /* ── 테마 정의 ── */
+  /* 라이트 */
+  body.theme-light {
+    --bg: #f5f7fa; --card: #ffffff; --card2: #f0f2f5;
+    --border: #d0d7de; --text: #1a1f2e; --muted: #57606a;
+    --blue: #0969da; --cyan: #0a7b8c; --purple: #7c3aed;
+    --yellow: #b45309; --red: #cf222e; --green: #1a7f37;
+    --memory-color: #0969da; --common-color: #b45309;
+    --foundry-color: #cf222e; --lsi-color: #7c3aed;
   }
-  body.light input[type=range] { filter: none; }
-  body.light .toggle-btn { border: 1px solid var(--border); }
-  body.light input[type=number] { color: var(--text); }
+  /* 삼성 블루 */
+  body.theme-samsung {
+    --bg: #010b19; --card: #001a38; --card2: #002050;
+    --border: #1a3a6a; --text: #e8f4ff; --muted: #7aafd4;
+    --blue: #1428a0; --cyan: #00b8d9; --purple: #7c3aed;
+    --yellow: #ffcd00; --red: #ff4444; --green: #00c49a;
+    --memory-color: #00b8d9; --common-color: #ffcd00;
+    --foundry-color: #ff4444; --lsi-color: #a78bfa;
+  }
+  /* 미드나잇 그린 */
+  body.theme-green {
+    --bg: #0a1a0f; --card: #0f2318; --card2: #142b1e;
+    --border: #1e4a2a; --text: #d4f5e0; --muted: #6aab7e;
+    --blue: #4ade80; --cyan: #34d399; --purple: #a78bfa;
+    --yellow: #fbbf24; --red: #f87171; --green: #22c55e;
+    --memory-color: #4ade80; --common-color: #fbbf24;
+    --foundry-color: #f87171; --lsi-color: #a78bfa;
+  }
+  /* 선셋 (따뜻한 다크) */
+  body.theme-sunset {
+    --bg: #1a0e00; --card: #2a1800; --card2: #331f00;
+    --border: #5a3a00; --text: #ffecd0; --muted: #c49a5a;
+    --blue: #ff9f43; --cyan: #feca57; --purple: #ff6b9d;
+    --yellow: #feca57; --red: #ff6b6b; --green: #48dbfb;
+    --memory-color: #ff9f43; --common-color: #feca57;
+    --foundry-color: #ff6b6b; --lsi-color: #ff6b9d;
+  }
+  body.theme-light input[type=range],
+  body.theme-light .toggle-btn { border: 1px solid var(--border); }
+  body.theme-light input[type=number] { color: var(--text); }
 
-  /* ── 테마 토글 버튼 ── */
-  .theme-toggle {
+  /* ── 테마 선택기 ── */
+  .theme-btn {
     position: fixed;
-    top: 14px;
-    right: 14px;
+    top: 14px; right: 14px;
     z-index: 999;
-    display: flex;
-    align-items: center;
-    gap: 6px;
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 5px 10px 5px 8px;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    transition: background 0.2s, border-color 0.2s;
-  }
-  .theme-toggle .theme-icon { font-size: 14px; line-height: 1; }
-  .theme-toggle .theme-label {
-    font-size: 11px;
-    color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
-    white-space: nowrap;
-  }
-  .theme-toggle-switch {
-    width: 32px;
-    height: 18px;
-    border-radius: 9px;
-    background: var(--border);
-    position: relative;
-    transition: background 0.2s;
-    flex-shrink: 0;
-  }
-  .theme-toggle-switch::after {
-    content: '';
-    position: absolute;
-    top: 2px; left: 2px;
-    width: 14px; height: 14px;
     border-radius: 50%;
-    background: var(--text);
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     transition: transform 0.2s;
   }
-  body.light .theme-toggle-switch { background: var(--blue); }
-  body.light .theme-toggle-switch::after { transform: translateX(14px); background: #fff; }
+  .theme-btn:hover { transform: scale(1.1); }
+  .theme-panel {
+    position: fixed;
+    top: 58px; right: 14px;
+    z-index: 998;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px;
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    min-width: 140px;
+  }
+  .theme-panel.open { display: flex; }
+  .theme-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text);
+    border: 1px solid transparent;
+    transition: background 0.15s;
+  }
+  .theme-option:hover { background: var(--card2); }
+  .theme-option.active { border-color: var(--blue); }
+  .theme-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
   /* responsive tweaks */
   @media (max-width: 400px) {
     .div-col-title { font-size: 12px; }
@@ -656,11 +680,24 @@
 </head>
 <body class="year-2026-active">
 
-<button class="theme-toggle" onclick="toggleTheme()" title="테마 변경">
-  <span class="theme-icon" id="theme-icon">🌙</span>
-  <span class="theme-label" id="theme-label">다크</span>
-  <div class="theme-toggle-switch"></div>
-</button>
+<button class="theme-btn" onclick="toggleThemePanel()" title="테마 변경">🎨</button>
+<div class="theme-panel" id="theme-panel">
+  <div class="theme-option active" id="opt-dark"    onclick="setTheme('dark')">
+    <div class="theme-dot" style="background:#0d1117;border:1px solid #30363d"></div> 다크
+  </div>
+  <div class="theme-option" id="opt-light"   onclick="setTheme('light')">
+    <div class="theme-dot" style="background:#f5f7fa;border:1px solid #d0d7de"></div> 라이트
+  </div>
+  <div class="theme-option" id="opt-samsung" onclick="setTheme('samsung')">
+    <div class="theme-dot" style="background:#1428a0"></div> 삼성 블루
+  </div>
+  <div class="theme-option" id="opt-green"   onclick="setTheme('green')">
+    <div class="theme-dot" style="background:#0f2318;border:1px solid #4ade80"></div> 미드나잇
+  </div>
+  <div class="theme-option" id="opt-sunset"  onclick="setTheme('sunset')">
+    <div class="theme-dot" style="background:#2a1800;border:1px solid #ff9f43"></div> 선셋
+  </div>
+</div>
 
 <div class="header">
   <h1>성과급 계산기</h1>
@@ -946,20 +983,31 @@ function updateSliderFill(el) {
 
 let currentYear = 2026;
 
-function toggleTheme() {
-  const isLight = document.body.classList.toggle('light');
-  document.getElementById('theme-icon').textContent  = isLight ? '☀️' : '🌙';
-  document.getElementById('theme-label').textContent = isLight ? '라이트' : '다크';
-  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+const THEMES = ['dark','light','samsung','green','sunset'];
+
+function toggleThemePanel() {
+  document.getElementById('theme-panel').classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.theme-btn') && !e.target.closest('.theme-panel'))
+    document.getElementById('theme-panel').classList.remove('open');
+});
+
+function setTheme(theme) {
+  THEMES.forEach(t => document.body.classList.remove('theme-'+t));
+  if (theme !== 'dark') document.body.classList.add('theme-'+theme);
+  THEMES.forEach(t => {
+    const el = document.getElementById('opt-'+t);
+    if (el) el.classList.toggle('active', t === theme);
+  });
+  localStorage.setItem('theme', theme);
+  document.getElementById('theme-panel').classList.remove('open');
 }
 
 // 저장된 테마 복원
 (function() {
-  if (localStorage.getItem('theme') === 'light') {
-    document.body.classList.add('light');
-    document.getElementById('theme-icon').textContent  = '☀️';
-    document.getElementById('theme-label').textContent = '라이트';
-  }
+  const saved = localStorage.getItem('theme') || 'dark';
+  setTheme(saved);
 })();
 
 function selectYear(year) {
