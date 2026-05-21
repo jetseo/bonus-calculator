@@ -523,6 +523,61 @@
 
   /* 2026년 탭: 르팡 관련 불필요 요소 숨김 */
   /* 2026년에도 토글 표시 - 적자조항 패널티만 미적용 */
+
+  /* ── OPI 섹션 ── */
+  .opi-section {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .opi-section .card-label { margin-bottom: 12px; }
+  .result-opi-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 3px;
+    gap: 4px;
+    overflow: hidden;
+  }
+  .result-opi-line .line-label { flex-shrink: 0; white-space: nowrap; }
+  .result-opi-line b {
+    color: var(--text);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    min-width: 0;
+    display: inline-block;
+    width: 100%;
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .result-opi-line.opi-row b { color: var(--green); }
+  .result-opi-line.ds-row b  { color: var(--cyan); }
+  .result-opi-line.total-row-line b { color: var(--yellow); font-weight: 700; }
+  .result-grand-total {
+    font-size: 14px;
+    font-weight: 900;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--yellow);
+    margin-top: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 100%;
+  }
+  .result-grand-sub {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+  .opi-note {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 6px;
+    line-height: 1.5;
+    font-style: italic;
+  }
   /* responsive tweaks */
   @media (max-width: 400px) {
     .div-col-title { font-size: 12px; }
@@ -666,6 +721,32 @@
     <span class="total-label">총 재원</span>
     <span class="total-value" id="total-display">31.5조 <span class="total-sub">(315,000억원)</span></span>
   </div>
+
+  <div class="opi-section">
+    <div class="card-label">OPI (성과인센티브) 설정</div>
+    <div class="slider-row">
+      <div class="slider-top">
+        <span class="slider-label">연봉 (기준)</span>
+        <span class="slider-value blue" id="salary-display">8,000만원</span>
+      </div>
+      <input type="range" id="salary-slider" class="blue-track"
+        min="3000" max="20000" step="500" value="8000"
+        oninput="updateAll()">
+    </div>
+    <div class="slider-row">
+      <div class="slider-top">
+        <span class="slider-label">OPI 지급률</span>
+        <span class="slider-value green" id="opi-display">50%</span>
+      </div>
+      <input type="range" id="opi-slider" class="blue-track"
+        min="0" max="100" step="5" value="50"
+        oninput="updateAll()">
+    </div>
+    <div style="font-size:10px;color:var(--muted);margin-top:4px;line-height:1.6;">
+      ※ OPI = 연봉 × 지급률. 메모리 최대 ~50%, 공통/LSI/파운드리 별도 산정.<br>
+      ※ 노조 자료 기준: 연봉 8천만원 × 50% = 4,000만원 적용.
+    </div>
+  </div>
   </div><!-- /card-body -->
 </div>
 
@@ -683,6 +764,11 @@
       <div class="result-line"><span class="line-label">사업부</span><b id="mem-bu-part">-</b></div>
       <div class="result-total" id="mem-total">-</div>
       <div class="result-sub" id="mem-sub">-</div>
+      <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;">
+        <div class="result-opi-line opi-row"><span class="line-label">OPI</span><b id="mem-opi">-</b></div>
+        <div class="result-opi-line ds-row"><span class="line-label">DS특별</span><b id="mem-ds">-</b></div>
+        <div class="result-opi-line total-row-line"><span class="line-label">합계</span><b id="mem-grand">-</b></div>
+      </div>
       <div class="result-bar"><div class="result-bar-fill memory" id="mem-bar" style="width:100%"></div></div>
     </div>
     <div class="result-card common">
@@ -691,6 +777,11 @@
       <div class="result-line"><span class="line-label">사업부</span><b id="com-bu-part">-</b></div>
       <div class="result-total" id="com-total">-</div>
       <div class="result-sub" id="com-sub">-</div>
+      <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;">
+        <div class="result-opi-line opi-row"><span class="line-label">OPI</span><b id="com-opi">-</b></div>
+        <div class="result-opi-line ds-row"><span class="line-label">DS특별</span><b id="com-ds">-</b></div>
+        <div class="result-opi-line total-row-line"><span class="line-label">합계</span><b id="com-grand">-</b></div>
+      </div>
       <div class="result-bar"><div class="result-bar-fill common" id="com-bar" style="width:75%"></div></div>
     </div>
     <div class="result-card lsi deficit-active" id="lsi-card">
@@ -699,6 +790,11 @@
       <div class="result-line"><span class="line-label">사업부</span><b id="lsi-bu-part">-</b></div>
       <div class="result-total" id="lsi-total">-</div>
       <div class="result-sub" id="lsi-sub">-</div>
+      <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;">
+        <div class="result-opi-line opi-row"><span class="line-label">OPI</span><b id="lsi-opi">-</b></div>
+        <div class="result-opi-line ds-row"><span class="line-label">DS특별</span><b id="lsi-ds">-</b></div>
+        <div class="result-opi-line total-row-line"><span class="line-label">합계</span><b id="lsi-grand">-</b></div>
+      </div>
       <div class="deficit-note show" id="lsi-deficit-note">공통 지급률 × 60%</div>
       <div class="result-bar"><div class="result-bar-fill" style="background:var(--lsi-color);width:30%" id="lsi-bar"></div></div>
     </div>
@@ -708,6 +804,11 @@
       <div class="result-line"><span class="line-label">사업부</span><b id="fou-bu-part">-</b></div>
       <div class="result-total" id="fou-total">-</div>
       <div class="result-sub" id="fou-sub">-</div>
+      <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;">
+        <div class="result-opi-line opi-row"><span class="line-label">OPI</span><b id="fou-opi">-</b></div>
+        <div class="result-opi-line ds-row"><span class="line-label">DS특별</span><b id="fou-ds">-</b></div>
+        <div class="result-opi-line total-row-line"><span class="line-label">합계</span><b id="fou-grand">-</b></div>
+      </div>
       <div class="deficit-note show" id="fou-deficit-note">공통 지급률 × 60%</div>
       <div class="result-bar"><div class="result-bar-fill foundry" id="fou-bar" style="width:30%"></div></div>
     </div>
@@ -920,6 +1021,13 @@ function updateAll() {
     yrNote.innerHTML = '<span>2027년~</span>: 적자 시 공통 지급률 × 60% 보장';
   }
 
+  // OPI 계산
+  const salary만 = parseFloat(document.getElementById('salary-slider').value) || 8000;
+  const opiRate  = parseFloat(document.getElementById('opi-slider').value) / 100 || 0.5;
+  const opi만    = salary만 * opiRate;
+  document.getElementById('salary-display').textContent = Math.round(salary만).toLocaleString() + '만원';
+  document.getElementById('opi-display').textContent    = Math.round(opiRate*100) + '%';
+
   function setResult(prefix, div만, bu만, tot만) {
     const divEl = document.getElementById(prefix+'-div-part');
     const buEl  = document.getElementById(prefix+'-bu-part');
@@ -931,6 +1039,20 @@ function updateAll() {
     totalEl.textContent = Math.round(tot만).toLocaleString() + '만원';
     fitText(totalEl, 16);
     document.getElementById(prefix+'-sub').textContent = fmtEok(tot만);
+
+    // OPI + DS특별 + 합계
+    const grand만 = opi만 + tot만;
+    const opiEl   = document.getElementById(prefix+'-opi');
+    const dsEl    = document.getElementById(prefix+'-ds');
+    const grandEl = document.getElementById(prefix+'-grand');
+    if (opiEl) {
+      opiEl.textContent   = fmt만(opi만);
+      fitText(opiEl, 10);
+      dsEl.textContent    = fmt만(tot만);
+      fitText(dsEl, 10);
+      grandEl.textContent = fmt만(grand만);
+      fitText(grandEl, 10);
+    }
   }
 
   setResult('mem', perHeadDiv만, memBU만,    memTotal만);
