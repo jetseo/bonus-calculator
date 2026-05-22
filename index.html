@@ -757,18 +757,27 @@
     <span class="total-label">DS특별성과급 재원</span>
     <span class="total-value" id="total-display">31.5조 <span class="total-sub">(315,000억원)</span></span>
   </div>
-  <div class="total-row" style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);">
-    <span class="total-label" style="font-size:11px;">OPI 재원 <span style="color:var(--muted);font-size:10px;">(영업이익×10%)</span></span>
-    <span class="total-value" id="opi-pool-display" style="font-size:14px;color:var(--green);">30.0조</span>
-  </div>
-  <div class="total-row" style="margin-top:4px;">
-    <span class="total-label" style="font-size:11px;">OPI 1인당 <span style="color:var(--muted);font-size:10px;">(연봉 50% 상한)</span></span>
-    <span class="total-value" id="opi-per-display" style="font-size:14px;color:var(--green);">3,846만원</span>
-  </div>
-  <div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.5;">
-    ※ 회의록 확정: DS특별성과급 모수 = <strong style="color:var(--text);">영업이익 그대로</strong><br>
-    ※ OPI(회의록): DS부문 재원 = 영업이익×10% (기존 EVA×20%에서 변경)<br>
-    ※ OPI는 개인 연봉의 50% 상한 적용
+  <div style="margin-top:10px;padding:10px;background:var(--card2);border-radius:8px;border:1px solid var(--border);">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-family:'JetBrains Mono',monospace;letter-spacing:1px;">OPI (별도 지급)</div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
+      <span style="font-size:11px;color:var(--muted);">재원 <span style="font-size:10px;">(영업이익×10%)</span></span>
+      <span style="font-size:13px;font-weight:700;color:var(--green);font-family:'JetBrains Mono',monospace;" id="opi-pool-display">30.0조</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
+      <span style="font-size:11px;color:var(--muted);">지급률 <span style="font-size:10px;">(상한 50%)</span></span>
+      <span style="font-size:13px;font-weight:700;color:var(--green);font-family:'JetBrains Mono',monospace;" id="opi-rate-display">50%</span>
+    </div>
+    <div style="border-top:1px dashed var(--border);margin:6px 0;"></div>
+    <div style="font-size:10px;color:var(--muted);line-height:1.7;">
+      연봉 <b style="color:var(--text);">5천만원</b> → OPI <b style="color:var(--green);" id="opi-5k">2,500만원</b><br>
+      연봉 <b style="color:var(--text);">8천만원</b> → OPI <b style="color:var(--green);" id="opi-8k">4,000만원</b><br>
+      연봉 <b style="color:var(--text);">1억원</b> → OPI <b style="color:var(--green);" id="opi-10k">5,000만원</b>
+    </div>
+    <div style="font-size:9px;color:var(--muted);margin-top:6px;line-height:1.5;">
+      ※ 회의록: DS특별성과급 모수 = 영업이익 그대로<br>
+      ※ OPI 재원 = 영업이익×10% (기존 EVA×20%→변경)<br>
+      ※ OPI pool이 전체연봉 총액 초과 → 항상 50% 상한 적용
+    </div>
   </div>
   </div><!-- /card-body -->
 </div>
@@ -968,13 +977,14 @@ function updateAll() {
     total조.toFixed(1) + '조 <span class="total-sub">(' + Math.round(total억).toLocaleString() + '억원)</span>';
 
   // OPI: 영업이익 × 10% (회의록: EVA×20% → 영업이익×10%로 변경)
+  // OPI pool이 전체연봉 총액보다 훨씬 크므로 항상 상한 50% 적용
   const opiPool조 = oi * 0.10;
-  const opiPool만 = opiPool조 * 10000 * 10000;
-  const totalHC_opi = 78000;
-  const opiPer만 = opiPool만 / totalHC_opi;  // 균등 기준 (실제는 연봉×율)
+  const opiRate = 50; // 항상 상한 (pool 30조 >> 전체연봉 7.8조)
   document.getElementById('opi-pool-display').textContent = opiPool조.toFixed(1) + '조';
-  document.getElementById('opi-per-display').textContent  =
-    Math.round(opiPer만).toLocaleString() + '만원 (균등기준)';
+  document.getElementById('opi-rate-display').textContent = opiRate + '% (상한)';
+  document.getElementById('opi-5k').textContent  = Math.round(5000  * opiRate/100).toLocaleString() + '만원';
+  document.getElementById('opi-8k').textContent  = Math.round(8000  * opiRate/100).toLocaleString() + '만원';
+  document.getElementById('opi-10k').textContent = Math.round(10000 * opiRate/100).toLocaleString() + '만원';
 
   const divPool만 = total만 * divRatio / 10;
   const buPool만  = total만 * buRatio  / 10;
