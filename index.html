@@ -731,20 +731,6 @@
 
   <div class="slider-row">
     <div class="slider-top">
-      <span class="slider-label">OPI 충당액 차감</span>
-      <span class="slider-value red" id="opi-deduct-display">3.7조</span>
-    </div>
-    <input type="range" id="opi-deduct-slider" class="blue-track"
-      min="0" max="10" step="0.1" value="3.7"
-      oninput="updateAll()">
-    <div style="font-size:10px;color:var(--muted);margin-top:4px;line-height:1.5;">
-      ※ 노조 위원장 공지: 모수 = 영업이익 - OPI 충당액 등 인건비<br>
-      ※ 추정: DS 78,000명 × 평균연봉 × OPI율 (기본값 약 3.7조)
-    </div>
-  </div>
-
-  <div class="slider-row">
-    <div class="slider-top">
       <span class="slider-label">성과급 재원 비율</span>
       <span class="slider-value purple" id="rate-display">10.5%</span>
     </div>
@@ -768,12 +754,21 @@
   </div>
 
   <div class="total-row">
-    <span class="total-label">실제 모수</span>
-    <span class="total-value" id="base-display" style="font-size:13px;color:var(--muted);">296.3조</span>
-  </div>
-  <div class="total-row" style="margin-top:6px;">
-    <span class="total-label">총 재원</span>
+    <span class="total-label">DS특별성과급 재원</span>
     <span class="total-value" id="total-display">31.5조 <span class="total-sub">(315,000억원)</span></span>
+  </div>
+  <div class="total-row" style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);">
+    <span class="total-label" style="font-size:11px;">OPI 재원 <span style="color:var(--muted);font-size:10px;">(영업이익×10%)</span></span>
+    <span class="total-value" id="opi-pool-display" style="font-size:14px;color:var(--green);">30.0조</span>
+  </div>
+  <div class="total-row" style="margin-top:4px;">
+    <span class="total-label" style="font-size:11px;">OPI 1인당 <span style="color:var(--muted);font-size:10px;">(연봉 50% 상한)</span></span>
+    <span class="total-value" id="opi-per-display" style="font-size:14px;color:var(--green);">3,846만원</span>
+  </div>
+  <div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.5;">
+    ※ 회의록 확정: DS특별성과급 모수 = <strong style="color:var(--text);">영업이익 그대로</strong><br>
+    ※ OPI(회의록): DS부문 재원 = 영업이익×10% (기존 EVA×20%에서 변경)<br>
+    ※ OPI는 개인 연봉의 50% 상한 적용
   </div>
   </div><!-- /card-body -->
 </div>
@@ -961,23 +956,25 @@ function updateAll() {
   const divRatio = parseInt(ratioSlider.value);
   const buRatio  = 10 - divRatio;
 
-  // OPI 차감: 실제 모수 = 영업이익 - OPI 충당액
-  const opiDeductSlider = document.getElementById('opi-deduct-slider');
-  const opiDeduct조 = parseFloat(opiDeductSlider.value) || 0;
-  const baseOi = oi - opiDeduct조;  // 실제 모수
-
-  document.getElementById('opi-deduct-display').textContent = opiDeduct조.toFixed(1) + '조';
   document.getElementById('oi-display').textContent    = oi + '조';
   document.getElementById('rate-display').textContent  = rate.toFixed(1) + '%';
   document.getElementById('ratio-display').textContent = divRatio + ' : ' + buRatio;
-  document.getElementById('base-display').innerHTML    =
-    baseOi.toFixed(1) + '조 <span style="font-size:10px;color:var(--muted);">(영업이익 ' + oi + '조 - OPI충당 ' + opiDeduct조.toFixed(1) + '조)</span>';
 
-  const total만 = baseOi * rate/100 * 10000 * 10000;  // 실제 모수 기준
+  // DS특별성과급: 모수 = 영업이익 그대로 (회의록 확정)
+  const total만 = oi * rate/100 * 10000 * 10000;
   const total억 = total만 / 10000;
   const total조 = total억 / 10000;
   document.getElementById('total-display').innerHTML =
     total조.toFixed(1) + '조 <span class="total-sub">(' + Math.round(total억).toLocaleString() + '억원)</span>';
+
+  // OPI: 영업이익 × 10% (회의록: EVA×20% → 영업이익×10%로 변경)
+  const opiPool조 = oi * 0.10;
+  const opiPool만 = opiPool조 * 10000 * 10000;
+  const totalHC_opi = 78000;
+  const opiPer만 = opiPool만 / totalHC_opi;  // 균등 기준 (실제는 연봉×율)
+  document.getElementById('opi-pool-display').textContent = opiPool조.toFixed(1) + '조';
+  document.getElementById('opi-per-display').textContent  =
+    Math.round(opiPer만).toLocaleString() + '만원 (균등기준)';
 
   const divPool만 = total만 * divRatio / 10;
   const buPool만  = total만 * buRatio  / 10;
