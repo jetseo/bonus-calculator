@@ -1090,16 +1090,19 @@ function updateAll() {
   const comTotal만 = perHeadDiv만 + comBU만;
 
   // S.LSI 최종
+  // 2026: 유예 → 부문분 100%
+  // 2027~: 적자 → 부문분의 60%만, 사업부분 없음
+  // 흑자: 정상 배분
   let lsiTotal만, lsiBU표시만;
   if (!lsiIsOut) {
     lsiTotal만  = perHeadDiv만 + lsiBU만;
     lsiBU표시만 = lsiBU만;
   } else if (currentYear === 2026) {
-    lsiTotal만  = perHeadDiv만;
+    lsiTotal만  = perHeadDiv만;         // 유예: 부문분 100%
     lsiBU표시만 = 0;
   } else {
-    lsiTotal만  = comTotal만 * 0.6;
-    lsiBU표시만 = lsiTotal만 - perHeadDiv만;
+    lsiTotal만  = perHeadDiv만 * 0.6;  // 2027~: 부문분×60%
+    lsiBU표시만 = 0;
   }
 
   // 파운드리 최종
@@ -1108,11 +1111,11 @@ function updateAll() {
     fouTotal만  = perHeadDiv만 + fouBU만;
     fouBU표시만 = fouBU만;
   } else if (currentYear === 2026) {
-    fouTotal만  = perHeadDiv만;
+    fouTotal만  = perHeadDiv만;         // 유예: 부문분 100%
     fouBU표시만 = 0;
   } else {
-    fouTotal만  = comTotal만 * 0.6;
-    fouBU표시만 = fouTotal만 - perHeadDiv만;
+    fouTotal만  = perHeadDiv만 * 0.6;  // 2027~: 부문분×60%
+    fouBU표시만 = 0;
   }
 
   // 연도 안내
@@ -1124,7 +1127,7 @@ function updateAll() {
   if (currentYear === 2026) {
     yrNote.innerHTML = '<span>2026년</span>: 적자 사업부 pool 제외 · 공통×60% 보장은 2027년~';
   } else {
-    yrNote.innerHTML = '<span>2027년~</span>: 적자 시 공통 지급률 × 60% 보장';
+    yrNote.innerHTML = '<span>2027년~</span>: 적자 시 부문 재원의 60%만 수령';
   }
 
   // OPI 계산
