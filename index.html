@@ -753,7 +753,20 @@
     </div>
   </div>
 
-  <div class="total-row">
+  <div class="slider-row" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+    <div class="slider-top">
+      <span class="slider-label">내 연봉</span>
+      <span class="slider-value green" id="salary-display">8,000만원</span>
+    </div>
+    <input type="range" id="salary-slider" class="blue-track"
+      min="3000" max="20000" step="500" value="8000"
+      oninput="updateAll()">
+    <div style="font-size:10px;color:var(--muted);margin-top:4px;">
+      ※ OPI 계산 기준 (연봉×50% 상한 적용)
+    </div>
+  </div>
+
+  <div class="total-row" style="margin-top:14px;">
     <span class="total-label">DS특별성과급 재원</span>
     <span class="total-value" id="total-display">31.5조 <span class="total-sub">(315,000억원)</span></span>
   </div>
@@ -764,17 +777,15 @@
       <span style="font-size:13px;font-weight:700;color:var(--green);font-family:'JetBrains Mono',monospace;" id="opi-pool-display">30.0조</span>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
-      <span style="font-size:11px;color:var(--muted);">지급률 <span style="font-size:10px;">(상한 50%)</span></span>
+      <span style="font-size:11px;color:var(--muted);">지급률 <span style="font-size:10px;">(항상 50% 상한)</span></span>
       <span style="font-size:13px;font-weight:700;color:var(--green);font-family:'JetBrains Mono',monospace;" id="opi-rate-display">50%</span>
     </div>
     <div style="border-top:1px dashed var(--border);margin:6px 0;"></div>
-    <div style="font-size:10px;color:var(--muted);line-height:1.7;">
-      연봉 <b style="color:var(--text);">5천만원</b> → OPI <b style="color:var(--green);" id="opi-5k">2,500만원</b><br>
-      연봉 <b style="color:var(--text);">8천만원</b> → OPI <b style="color:var(--green);" id="opi-8k">4,000만원</b><br>
-      연봉 <b style="color:var(--text);">1억원</b> → OPI <b style="color:var(--green);" id="opi-10k">5,000만원</b>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;">
+      <span style="font-size:11px;color:var(--muted);">내 OPI <span style="font-size:10px;">(연봉×50%)</span></span>
+      <span style="font-size:15px;font-weight:900;color:var(--green);font-family:'JetBrains Mono',monospace;" id="my-opi-display">4,000만원</span>
     </div>
     <div style="font-size:9px;color:var(--muted);margin-top:6px;line-height:1.5;">
-      ※ 회의록: DS특별성과급 모수 = 영업이익 그대로<br>
       ※ OPI 재원 = 영업이익×10% (기존 EVA×20%→변경)<br>
       ※ OPI pool이 전체연봉 총액 초과 → 항상 50% 상한 적용
     </div>
@@ -798,6 +809,20 @@
       <div class="result-sub" id="mem-sub">-</div>
       <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;">
       </div>
+      <div style="border-top:1px solid var(--border);margin:8px 0 6px;"></div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:3px;overflow:hidden;">
+        <span style="flex-shrink:0;">OPI</span>
+        <b id="mem-opi-show" style="color:var(--green);font-family:'JetBrains Mono',monospace;white-space:nowrap;font-weight:500;">-</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:6px;overflow:hidden;">
+        <span style="flex-shrink:0;">DS특별</span>
+        <b id="mem-ds-show" style="color:var(--cyan);font-family:'JetBrains Mono',monospace;white-space:nowrap;font-weight:500;">-</b>
+      </div>
+      <div style="background:var(--card2);border-radius:6px;padding:6px 8px;margin-bottom:6px;">
+        <div style="font-size:9px;color:var(--muted);margin-bottom:2px;">총 합계 (OPI+DS특별)</div>
+        <div id="mem-grand-total" style="font-size:15px;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--yellow);white-space:nowrap;overflow:hidden;">-</div>
+        <div id="mem-grand-sub" style="font-size:10px;color:var(--muted);">-</div>
+      </div>
       <div class="result-bar"><div class="result-bar-fill memory" id="mem-bar" style="width:100%"></div></div>
     </div>
     <div class="result-card common">
@@ -807,6 +832,20 @@
       <div class="result-total" id="com-total">-</div>
       <div class="result-sub" id="com-sub">-</div>
       <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;">
+      </div>
+      <div style="border-top:1px solid var(--border);margin:8px 0 6px;"></div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:3px;overflow:hidden;">
+        <span style="flex-shrink:0;">OPI</span>
+        <b id="com-opi-show" style="color:var(--green);font-family:'JetBrains Mono',monospace;white-space:nowrap;font-weight:500;">-</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:6px;overflow:hidden;">
+        <span style="flex-shrink:0;">DS특별</span>
+        <b id="com-ds-show" style="color:var(--cyan);font-family:'JetBrains Mono',monospace;white-space:nowrap;font-weight:500;">-</b>
+      </div>
+      <div style="background:var(--card2);border-radius:6px;padding:6px 8px;margin-bottom:6px;">
+        <div style="font-size:9px;color:var(--muted);margin-bottom:2px;">총 합계 (OPI+DS특별)</div>
+        <div id="com-grand-total" style="font-size:15px;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--yellow);white-space:nowrap;overflow:hidden;">-</div>
+        <div id="com-grand-sub" style="font-size:10px;color:var(--muted);">-</div>
       </div>
       <div class="result-bar"><div class="result-bar-fill common" id="com-bar" style="width:75%"></div></div>
     </div>
@@ -819,6 +858,20 @@
       <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;">
       </div>
       <div class="deficit-note show" id="lsi-deficit-note">공통 지급률 × 60%</div>
+      <div style="border-top:1px solid var(--border);margin:8px 0 6px;"></div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:3px;overflow:hidden;">
+        <span style="flex-shrink:0;">OPI</span>
+        <b id="lsi-opi-show" style="color:var(--green);font-family:'JetBrains Mono',monospace;white-space:nowrap;font-weight:500;">-</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:6px;overflow:hidden;">
+        <span style="flex-shrink:0;">DS특별</span>
+        <b id="lsi-ds-show" style="color:var(--cyan);font-family:'JetBrains Mono',monospace;white-space:nowrap;font-weight:500;">-</b>
+      </div>
+      <div style="background:var(--card2);border-radius:6px;padding:6px 8px;margin-bottom:6px;">
+        <div style="font-size:9px;color:var(--muted);margin-bottom:2px;">총 합계 (OPI+DS특별)</div>
+        <div id="lsi-grand-total" style="font-size:15px;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--yellow);white-space:nowrap;overflow:hidden;">-</div>
+        <div id="lsi-grand-sub" style="font-size:10px;color:var(--muted);">-</div>
+      </div>
       <div class="result-bar"><div class="result-bar-fill" style="background:var(--lsi-color);width:30%" id="lsi-bar"></div></div>
     </div>
     <div class="result-card foundry deficit-active" id="fou-card">
@@ -830,6 +883,20 @@
       <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;">
       </div>
       <div class="deficit-note show" id="fou-deficit-note">공통 지급률 × 60%</div>
+      <div style="border-top:1px solid var(--border);margin:8px 0 6px;"></div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:3px;overflow:hidden;">
+        <span style="flex-shrink:0;">OPI</span>
+        <b id="fou-opi-show" style="color:var(--green);font-family:'JetBrains Mono',monospace;white-space:nowrap;font-weight:500;">-</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:6px;overflow:hidden;">
+        <span style="flex-shrink:0;">DS특별</span>
+        <b id="fou-ds-show" style="color:var(--cyan);font-family:'JetBrains Mono',monospace;white-space:nowrap;font-weight:500;">-</b>
+      </div>
+      <div style="background:var(--card2);border-radius:6px;padding:6px 8px;margin-bottom:6px;">
+        <div style="font-size:9px;color:var(--muted);margin-bottom:2px;">총 합계 (OPI+DS특별)</div>
+        <div id="fou-grand-total" style="font-size:15px;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--yellow);white-space:nowrap;overflow:hidden;">-</div>
+        <div id="fou-grand-sub" style="font-size:10px;color:var(--muted);">-</div>
+      </div>
       <div class="result-bar"><div class="result-bar-fill foundry" id="fou-bar" style="width:30%"></div></div>
     </div>
   </div>
@@ -976,15 +1043,16 @@ function updateAll() {
   document.getElementById('total-display').innerHTML =
     total조.toFixed(1) + '조 <span class="total-sub">(' + Math.round(total억).toLocaleString() + '억원)</span>';
 
-  // OPI: 영업이익 × 10% (회의록: EVA×20% → 영업이익×10%로 변경)
-  // OPI pool이 전체연봉 총액보다 훨씬 크므로 항상 상한 50% 적용
+  // 연봉 슬라이더
+  const salary만 = parseFloat(document.getElementById('salary-slider').value) || 8000;
+  document.getElementById('salary-display').textContent = salary만.toLocaleString() + '만원';
+
+  // OPI: 영업이익×10%, 항상 50% 상한
   const opiPool조 = oi * 0.10;
-  const opiRate = 50; // 항상 상한 (pool 30조 >> 전체연봉 7.8조)
+  const myOpi만   = salary만 * 0.5;  // 50% 상한
   document.getElementById('opi-pool-display').textContent = opiPool조.toFixed(1) + '조';
-  document.getElementById('opi-rate-display').textContent = opiRate + '% (상한)';
-  document.getElementById('opi-5k').textContent  = Math.round(5000  * opiRate/100).toLocaleString() + '만원';
-  document.getElementById('opi-8k').textContent  = Math.round(8000  * opiRate/100).toLocaleString() + '만원';
-  document.getElementById('opi-10k').textContent = Math.round(10000 * opiRate/100).toLocaleString() + '만원';
+  document.getElementById('opi-rate-display').textContent = '50% (상한)';
+  document.getElementById('my-opi-display').textContent   = myOpi만.toLocaleString() + '만원';
 
   const divPool만 = total만 * divRatio / 10;
   const buPool만  = total만 * buRatio  / 10;
@@ -1082,6 +1150,25 @@ function updateAll() {
     totalEl.textContent = Math.round(tot만).toLocaleString() + '만원';
     fitText(totalEl, 16);
     document.getElementById(prefix+'-sub').textContent = fmtEok(tot만);
+
+    // OPI + DS특별 + 총합계
+    const salary만 = parseFloat(document.getElementById('salary-slider').value) || 8000;
+    const myOpi만  = salary만 * 0.5;
+    const grand만  = myOpi만 + tot만;
+
+    const opiShow = document.getElementById(prefix+'-opi-show');
+    const dsShow  = document.getElementById(prefix+'-ds-show');
+    const grandEl = document.getElementById(prefix+'-grand-total');
+    const grandSub= document.getElementById(prefix+'-grand-sub');
+    if (opiShow) {
+      opiShow.textContent = fmt만(myOpi만);
+      fitText(opiShow, 10);
+      dsShow.textContent  = fmt만(tot만);
+      fitText(dsShow, 10);
+      grandEl.textContent = Math.round(grand만).toLocaleString() + '만원';
+      fitText(grandEl, 15);
+      grandSub.textContent = fmtEok(grand만);
+    }
   }
 
   setResult('mem', perHeadDiv만, memBU만,    memTotal만);
