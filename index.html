@@ -819,7 +819,7 @@
         <b id="mem-ds-show" style="color:var(--cyan);font-family:'JetBrains Mono',monospace;white-space:nowrap;font-weight:500;">-</b>
       </div>
       <div style="background:var(--card2);border-radius:6px;padding:6px 8px;margin-bottom:6px;">
-        <div style="font-size:9px;color:var(--muted);margin-bottom:2px;">총 합계 (OPI+DS특별)</div>
+        <div style="font-size:9px;color:var(--muted);margin-bottom:2px;">총 실수령 (세후)</div>
         <div id="mem-grand-total" style="font-size:15px;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--yellow);white-space:nowrap;overflow:hidden;">-</div>
         <div id="mem-grand-sub" style="font-size:10px;color:var(--muted);">-</div>
       </div>
@@ -843,7 +843,7 @@
         <b id="com-ds-show" style="color:var(--cyan);font-family:'JetBrains Mono',monospace;white-space:nowrap;font-weight:500;">-</b>
       </div>
       <div style="background:var(--card2);border-radius:6px;padding:6px 8px;margin-bottom:6px;">
-        <div style="font-size:9px;color:var(--muted);margin-bottom:2px;">총 합계 (OPI+DS특별)</div>
+        <div style="font-size:9px;color:var(--muted);margin-bottom:2px;">총 실수령 (세후)</div>
         <div id="com-grand-total" style="font-size:15px;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--yellow);white-space:nowrap;overflow:hidden;">-</div>
         <div id="com-grand-sub" style="font-size:10px;color:var(--muted);">-</div>
       </div>
@@ -868,7 +868,7 @@
         <b id="lsi-ds-show" style="color:var(--cyan);font-family:'JetBrains Mono',monospace;white-space:nowrap;font-weight:500;">-</b>
       </div>
       <div style="background:var(--card2);border-radius:6px;padding:6px 8px;margin-bottom:6px;">
-        <div style="font-size:9px;color:var(--muted);margin-bottom:2px;">총 합계 (OPI+DS특별)</div>
+        <div style="font-size:9px;color:var(--muted);margin-bottom:2px;">총 실수령 (세후)</div>
         <div id="lsi-grand-total" style="font-size:15px;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--yellow);white-space:nowrap;overflow:hidden;">-</div>
         <div id="lsi-grand-sub" style="font-size:10px;color:var(--muted);">-</div>
       </div>
@@ -893,7 +893,7 @@
         <b id="fou-ds-show" style="color:var(--cyan);font-family:'JetBrains Mono',monospace;white-space:nowrap;font-weight:500;">-</b>
       </div>
       <div style="background:var(--card2);border-radius:6px;padding:6px 8px;margin-bottom:6px;">
-        <div style="font-size:9px;color:var(--muted);margin-bottom:2px;">총 합계 (OPI+DS특별)</div>
+        <div style="font-size:9px;color:var(--muted);margin-bottom:2px;">총 실수령 (세후)</div>
         <div id="fou-grand-total" style="font-size:15px;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--yellow);white-space:nowrap;overflow:hidden;">-</div>
         <div id="fou-grand-sub" style="font-size:10px;color:var(--muted);">-</div>
       </div>
@@ -940,6 +940,43 @@
 <script>
 function fmt만(val) {
   return Math.round(val).toLocaleString() + '만원';
+}
+
+// 근로소득공제
+function 근로소득공제(총급여) {
+  if (총급여 <= 500)   return 총급여 * 0.70;
+  if (총급여 <= 1500)  return 350 + (총급여 - 500) * 0.40;
+  if (총급여 <= 4500)  return 750 + (총급여 - 1500) * 0.15;
+  if (총급여 <= 10000) return 1200 + (총급여 - 4500) * 0.05;
+  return 1475;
+}
+
+// 누진세 (과세표준, 만원)
+function 소득세(과표) {
+  if (과표 <= 0) return 0;
+  const 구간 = [
+    [1400, 0.06, 0], [5000, 0.15, 126], [8800, 0.24, 576],
+    [15000, 0.35, 1544], [30000, 0.38, 1994],
+    [50000, 0.40, 2594], [Infinity, 0.42, 3594]
+  ];
+  for (const [상한, 세율, 누진공제] of 구간) {
+    if (과표 <= 상한) return 과표 * 세율 - 누진공제;
+  }
+}
+
+// 성과급 실수령 계산 (연봉+성과급 합산 누진세 적용)
+function calcAfterTax(연봉만, 성과급만) {
+  const 총급여 = 연봉만 + 성과급만;
+  const 공제 = 근로소득공제(총급여);
+  const 기본공제 = 150;
+  const 세금_합산 = 소득세(Math.max(0, 총급여 - 공제 - 기본공제));
+  const 세금_연봉 = 소득세(Math.max(0, 연봉만 - 근로소득공제(연봉만) - 기본공제));
+  const 추가소득세 = 세금_합산 - 세금_연봉;
+  const 지방세 = 추가소득세 * 0.10;
+  const 총세금 = 추가소득세 + 지방세;
+  const 실수령 = 성과급만 - 총세금;
+  const 실효세율 = 성과급만 > 0 ? (총세금 / 성과급만 * 100) : 0;
+  return { 총세금: Math.round(총세금), 실수령: Math.round(실수령), 실효세율: 실효세율.toFixed(1) };
 }
 function fmtEok(val) {
   return '≈ ' + (val / 10000).toFixed(1) + '억';
@@ -1151,23 +1188,31 @@ function updateAll() {
     fitText(totalEl, 16);
     document.getElementById(prefix+'-sub').textContent = fmtEok(tot만);
 
-    // OPI + DS특별 + 총합계
+    // OPI + DS특별 + 세후 실수령
     const salary만 = parseFloat(document.getElementById('salary-slider').value) || 8000;
     const myOpi만  = salary만 * 0.5;
-    const grand만  = myOpi만 + tot만;
+
+    // DS특별성과급 세후 계산 (근로소득, 연봉 합산 누진세)
+    const tax = calcAfterTax(salary만, tot만);
+    // OPI도 근로소득 → 연봉+DS특별+OPI 합산세 계산
+    const taxAll = calcAfterTax(salary만 + tot만, myOpi만);
+    const 총실수령만 = tax.실수령 + taxAll.실수령;
 
     const opiShow = document.getElementById(prefix+'-opi-show');
     const dsShow  = document.getElementById(prefix+'-ds-show');
     const grandEl = document.getElementById(prefix+'-grand-total');
     const grandSub= document.getElementById(prefix+'-grand-sub');
     if (opiShow) {
-      opiShow.textContent = fmt만(myOpi만);
+      // OPI 세후
+      opiShow.textContent = taxAll.실수령.toLocaleString() + '만원 (세후)';
       fitText(opiShow, 10);
-      dsShow.textContent  = fmt만(tot만);
+      // DS특별 세후
+      dsShow.textContent = tax.실수령.toLocaleString() + '만원 (세후 ' + tax.실효세율 + '%)';
       fitText(dsShow, 10);
-      grandEl.textContent = Math.round(grand만).toLocaleString() + '만원';
+      // 총 실수령
+      grandEl.textContent = 총실수령만.toLocaleString() + '만원';
       fitText(grandEl, 15);
-      grandSub.textContent = fmtEok(grand만);
+      grandSub.textContent = '≈ ' + (총실수령만/10000).toFixed(1) + '억 (세후 실수령)';
     }
   }
 
